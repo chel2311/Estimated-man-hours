@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開発工数見積もりツール ポータル</title>
+    <style>
+        :root {
+            --primary-color: #005BAB;
+            --primary-dark: #004590;
+            --secondary-color: #FF961C;
+            --light-blue: #E0EEF9;
+            --medium-blue: #4D8BC9;
+            --neutral-grey: #F5F5F5;
+            --dark-grey: #616161;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --bg-color: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Meiryo', 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: var(--text-light);
+            padding: clamp(30px, 4vh, 50px) 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: min(1200px, 95vw);
+            margin: 0 auto;
+            padding: 0 clamp(10px, 2vw, 20px);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: clamp(16px, 2vw, 20px);
+            opacity: 0.9;
+        }
+
+        main {
+            flex: 1;
+            max-width: min(1200px, 95vw);
+            margin: 0 auto;
+            padding: clamp(30px, 4vw, 50px) clamp(10px, 2vw, 20px);
+            width: 100%;
+        }
+
+        .intro-section {
+            background: white;
+            border-radius: 12px;
+            padding: clamp(20px, 3vw, 30px);
+            margin-bottom: clamp(30px, 4vw, 40px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .intro-section h2 {
+            color: var(--primary-color);
+            font-size: clamp(20px, 2.5vw, 24px);
+            margin-bottom: 15px;
+        }
+
+        .intro-section p {
+            color: var(--dark-grey);
+            font-size: clamp(14px, 1.8vw, 16px);
+            line-height: 1.8;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+            gap: clamp(20px, 3vw, 30px);
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--medium-blue));
+            color: white;
+            padding: clamp(20px, 2.5vw, 25px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+
+        .card-header h2 {
+            font-size: clamp(20px, 2.5vw, 26px);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 5px;
+        }
+
+        .card-type {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-body {
+            padding: clamp(20px, 2.5vw, 25px);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: clamp(14px, 1.6vw, 16px);
+            margin-bottom: clamp(20px, 2.5vw, 25px);
+            flex: 1;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: clamp(20px, 2.5vw, 25px);
+        }
+
+        .feature-list li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            font-size: clamp(13px, 1.5vw, 15px);
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .card-link {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            padding: clamp(12px, 1.5vw, 14px) clamp(24px, 3vw, 32px);
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: clamp(14px, 1.6vw, 16px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card-link:hover {
+            background: #e67e00;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            text-align: center;
+            padding: clamp(20px, 2.5vh, 25px);
+            margin-top: auto;
+        }
+
+        footer p {
+            font-size: clamp(12px, 1.5vw, 14px);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* アニメーション */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tool-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.2s; }
+
+        /* アイコンスタイル */
+        .calculator-icon::before { content: "🧮"; }
+        .guide-icon::before { content: "📚"; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>開発工数見積もりツール ポータル</h1>
+            <p>効率的な開発プロジェクト管理のための見積もりツール</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="intro-section">
+            <h2>開発工数見積もりツールについて</h2>
+            <p>
+                このポータルでは、社内SE向けの開発工数見積もりツールと、見積もりルールの解説ガイドを提供しています。
+                正確な工数見積もりは、プロジェクトの成功に不可欠です。これらのツールを活用して、
+                より精度の高い見積もりと効率的なプロジェクト管理を実現しましょう。
+            </p>
+        </div>
+
+        <div class="tools-grid">
+            <!-- 社内SE開発工数見積ツール -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <span class="card-type">計算ツール</span>
+                    <div class="icon calculator-icon"></div>
+                    <h2>社内SE開発工数見積ツール</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-description">
+                        開発プロジェクトの工数を効率的に見積もるための実用的なツール。
+                        開発規模、技術難易度、リスク要因などを考慮して、精度の高い工数計算を行います。
+                    </p>
+                    <ul class="feature-list">
+                        <li>開発規模に基づく基本工数の自動計算</li>
+                        <li>技術難易度・複雑度の考慮</li>
+                        <li>リスク要因による調整係数</li>
+                        <li>フェーズ別の工数内訳表示</li>
+                        <li>見積もり結果のエクスポート機能</li>
+                    </ul>
+                    <a href="Estimated man-hours.html" class="card-link">
+                        見積ツールを開く →
+                    </a>
+                </div>
+            </div>
+
+            <!-- 開発工数見積ルール解説ガイド -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <span class="card-type">解説ガイド</span>
+                    <div class="icon guide-icon"></div>
+                    <h2>開発工数見積ルール解説ガイド</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-description">
+                        開発工数見積もりのルールと考え方をビジュアルで分かりやすく解説。
+                        見積もりの基本原則から実践的なテクニックまで、体系的に学習できます。
+                    </p>
+                    <ul class="feature-list">
+                        <li>見積もりの基本原則と考え方</li>
+                        <li>工数算出の具体的な手順</li>
+                        <li>よくある見積もりの落とし穴と対策</li>
+                        <li>ビジュアルでわかりやすい解説</li>
+                        <li>実践的なケーススタディ</li>
+                    </ul>
+                    <a href="estimate-rules-guide.html" class="card-link">
+                        解説ガイドを開く →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 開発工数見積もりツール. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // ページ読み込み時のアニメーション
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.tool-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+
+        // ウィンドウサイズに応じた調整
+        function adjustScale() {
+            const viewportWidth = window.innerWidth;
+            
+            if (viewportWidth < 768) {
+                document.documentElement.style.fontSize = '14px';
+            } else if (viewportWidth < 992) {
+                document.documentElement.style.fontSize = '15px';
+            } else {
+                document.documentElement.style.fontSize = '16px';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', adjustScale);
+        window.addEventListener('resize', adjustScale);
+    </script>
+</body>
+</html>
