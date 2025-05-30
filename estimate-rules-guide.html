@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開発工数見積ルール解説ガイド - ビジュアル版</title>
+    <style>
+        :root {
+            --primary-color: #005BAB;
+            --secondary-color: #FF961C;
+            --light-blue: #E0EEF9;
+            --medium-blue: #4D8BC9;
+            --neutral-grey: #F5F5F5;
+            --dark-grey: #616161;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #F44336;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Meiryo, "Hiragino Kaku Gothic Pro", sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-dark);
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--medium-blue) 100%);
+            color: var(--text-light);
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .subtitle {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* ナビゲーションメニュー */
+        .nav-menu {
+            background: white;
+            padding: 1rem;
+            margin: -1rem -2rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-item {
+            padding: 0.5rem 1.5rem;
+            background: var(--light-blue);
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,91,171,0.3);
+        }
+        
+        /* カードスタイル */
+        .method-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .method-card:hover::before {
+            width: 8px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .icon {
+            width: 40px;
+            height: 40px;
+            background: var(--light-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        /* 計算式の視覚化 */
+        .formula-visual {
+            background: linear-gradient(to right, var(--light-blue), #fff);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .formula-visual::after {
+            content: '=';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            color: var(--secondary-color);
+            opacity: 0.3;
+        }
+        
+        .formula-parts {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 1.2rem;
+        }
+        
+        .formula-part {
+            background: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .formula-part:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .operator {
+            font-size: 1.5rem;
+            color: var(--medium-blue);
+            font-weight: bold;
+        }
+        
+        /* インタラクティブな表 */
+        .interactive-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .interactive-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .interactive-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .interactive-table tr:hover td {
+            background: var(--light-blue);
+            transform: translateX(5px);
+        }
+        
+        .interactive-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 係数バッジ */
+        .coefficient-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .coefficient-low {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .coefficient-medium {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+        
+        .coefficient-high {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+        
+        /* 視覚的な進捗バー */
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--neutral-grey);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--medium-blue), var(--primary-color));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* ツールチップ改善 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            cursor: help;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .tooltip:hover {
+            color: var(--secondary-color);
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 320px;
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -160px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: normal;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+        
+        /* 図解SVG */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        .svg-diagram {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* 計算シミュレーター */
+        .calculator {
+            background: var(--light-blue);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        
+        .calc-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .calc-input label {
+            font-weight: 600;
+            min-width: 120px;
+        }
+        
+        .calc-input input,
+        .calc-input select {
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .calc-input input:focus,
+        .calc-input select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(255,150,28,0.2);
+        }
+        
+        .calc-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .calc-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,150,28,0.3);
+        }
+        
+        .calc-result {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+        
+        .calc-result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .calc-method {
+            margin-top: 1rem;
+        }
+        
+        .calc-method h4 {
+            color: var(--medium-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .calc-input input[type="number"] {
+            width: 80px;
+            margin-right: 0.5rem;
+        }
+        
+        #fp-formal-calc .calc-input input[type="number"] {
+            width: 60px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .formula-parts {
+                flex-direction: column;
+            }
+            
+            .nav-menu {
+                margin: -0.5rem -1rem 1rem;
+            }
+            
+            .method-card {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* アニメーション */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* 警告・注意ボックス */
+        .alert-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            position: relative;
+            padding-left: 3.5rem;
+        }
+        
+        .alert-box::before {
+            content: '⚠️';
+            position: absolute;
+            left: 1rem;
+            top: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .alert-warning {
+            background: #FFF3E0;
+            border: 2px solid var(--secondary-color);
+        }
+        
+        .alert-danger {
+            background: #FFEBEE;
+            border: 2px solid var(--danger-color);
+        }
+        
+        .alert-success {
+            background: #E8F5E9;
+            border: 2px solid var(--success-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔧 開発工数見積ルール解説ガイド</h1>
+        <p class="subtitle">各手法の特徴と係数を視覚的に理解する</p>
+    </header>
+    
+    <div class="container">
+        <!-- ナビゲーションメニュー -->
+        <nav class="nav-menu">
+            <a href="#simple" class="nav-item">簡易見積法</a>
+            <a href="#three-point" class="nav-item">3点見積法</a>
+            <a href="#feature-point" class="nav-item">機能点数法</a>
+            <a href="#comparison" class="nav-item">類似案件比較法</a>
+            <a href="#step-based" class="nav-item">ステップ数見積法</a>
+            <a href="#language" class="nav-item">言語別調整</a>
+            <a href="#simulator" class="nav-item">シミュレーター</a>
+        </nav>
+        
+        <!-- 簡易見積法 -->
+        <div id="simple" class="method-card fade-in">
+            <h2><span class="icon">📊</span>1. 簡易見積法</h2>
+            
+            <div class="formula-visual">
+                <div class="formula-parts">
+                    <div class="formula-part">画面数</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">3人日</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">複雑度</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">チーム経験</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">リスクバッファ</div>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="600" height="250" viewBox="0 0 600 250">
+                    <!-- 画面あたり3人日の内訳 -->
+                    <text x="300" y="20" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">画面あたり3人日の内訳</text>
+                    
+                    <!-- 円グラフ -->
+                    <g transform="translate(150, 130)">
+                        <!-- 設計 0.5日 = 60度 -->
+                        <path d="M 0,0 L 0,-80 A 80,80 0 0,1 69.28,-40 z" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="20" y="-50" font-size="12" fill="#333">設計</text>
+                        <text x="15" y="-35" font-size="10" fill="#666">0.5日</text>
+                        
+                        <!-- HTML/CSS 0.5日 = 60度 -->
+                        <path d="M 0,0 L 69.28,-40 A 80,80 0 0,1 69.28,40 z" fill="#4D8BC9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="75" y="5" font-size="12" fill="#333">HTML/CSS</text>
+                        <text x="80" y="20" font-size="10" fill="#666">0.5日</text>
+                        
+                        <!-- ロジック 1日 = 120度 -->
+                        <path d="M 0,0 L 69.28,40 A 80,80 0 0,1 -69.28,40 z" fill="#FF961C" stroke="#005BAB" stroke-width="2"/>
+                        <text x="-10" y="65" font-size="12" fill="#333">ロジック実装</text>
+                        <text x="5" y="80" font-size="10" fill="#666">1.0日</text>
+                        
+                        <!-- 単体テスト 0.5日 = 60度 -->
+                        <path d="M 0,0 L -69.28,40 A 80,80 0 0,1 -69.28,-40 z" fill="#F5F5F5" stroke="#005BAB" stroke-width="2"/>
+                        <text x="-100" y="5" font-size="12" fill="#333">単体テスト</text>
+                        <text x="-85" y="20" font-size="10" fill="#666">0.5日</text>
+                        
+                        <!-- 結合テスト 0.5日 = 60度 -->
+                        <path d="M 0,0 L -69.28,-40 A 80,80 0 0,1 0,-80 z" fill="#616161" stroke="#005BAB" stroke-width="2"/>
+                        <text x="-45" y="-50" font-size="12" fill="#333">結合</text>
+                        <text x="-45" y="-35" font-size="10" fill="#666">0.5日</text>
+                    </g>
+                    
+                    <!-- 工数配分 -->
+                    <g transform="translate(400, 100)">
+                        <text x="0" y="-20" font-size="14" font-weight="bold" fill="#005BAB">工数配分</text>
+                        
+                        <rect x="0" y="0" width="150" height="30" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <rect x="0" y="0" width="45" height="30" fill="#4D8BC9"/>
+                        <text x="22" y="20" text-anchor="middle" font-size="12" fill="white">設計30%</text>
+                        
+                        <rect x="0" y="40" width="150" height="30" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <rect x="0" y="40" width="60" height="30" fill="#FF961C"/>
+                        <text x="30" y="60" text-anchor="middle" font-size="12" fill="white">開発40%</text>
+                        
+                        <rect x="0" y="80" width="150" height="30" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <rect x="0" y="80" width="45" height="30" fill="#616161"/>
+                        <text x="22" y="100" text-anchor="middle" font-size="12" fill="white">テスト30%</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3>複雑度係数の詳細</h3>
+            <table class="interactive-table">
+                <tr>
+                    <th>レベル</th>
+                    <th>係数</th>
+                    <th>適用条件</th>
+                    <th>具体例</th>
+                </tr>
+                <tr>
+                    <td>低</td>
+                    <td><span class="coefficient-badge coefficient-low">×0.7</span></td>
+                    <td>単純な<span class="tooltip">CRUD処理<span class="tooltiptext">Create（作成）、Read（読取）、Update（更新）、Delete（削除）の基本的なデータベース操作。多くの業務システムの基本機能で、実装パターンが確立されている</span></span>のみ</td>
+                    <td>マスタメンテナンス画面、単純な一覧表示</td>
+                </tr>
+                <tr>
+                    <td>中</td>
+                    <td><span class="coefficient-badge coefficient-medium">×1.0</span></td>
+                    <td>標準的な業務処理、通常の<span class="tooltip">バリデーション<span class="tooltiptext">入力値の妥当性を検証する処理。例：メールアドレスの形式チェック、必須項目の入力チェック、数値の範囲チェック、日付の妥当性確認など</span></span></td>
+                    <td>受注入力、在庫管理、一般的な帳票出力</td>
+                </tr>
+                <tr>
+                    <td>高</td>
+                    <td><span class="coefficient-badge coefficient-high">×1.5</span></td>
+                    <td>複雑な計算処理、多数の条件分岐、外部連携</td>
+                    <td>価格計算（複数の割引条件）、API連携、承認ワークフロー</td>
+                </tr>
+                <tr>
+                    <td>非常に高</td>
+                    <td><span class="coefficient-badge coefficient-high">×2.0</span></td>
+                    <td><span class="tooltip">リアルタイム処理<span class="tooltiptext">データの入力や変更が即座に反映される処理。例：チャット、株価表示、オンラインゲームなど、遅延が許されない処理。WebSocketやポーリングなどの技術を使用</span></span>、高度な<span class="tooltip">アルゴリズム<span class="tooltiptext">問題を解決するための手順や計算方法。例：最短経路探索、機械学習、暗号化処理、最適化計算など、数学的・論理的思考が必要な処理</span></span></td>
+                    <td>リアルタイムダッシュボード、AI予測、複雑な最適化処理</td>
+                </tr>
+            </table>
+            
+            <div class="alert-box alert-warning">
+                <strong>ポイント：</strong><span class="tooltip">ウォーターフォール開発<span class="tooltiptext">要件定義→設計→実装→テスト→リリースと、上流から下流へ順番に進める開発手法。各工程が完了してから次に進むため、滝（ウォーターフォール）に例えられる。変更に弱いが、計画が立てやすい</span></span>の経験則に基づく配分で、設計の品質が後工程に大きく影響するため、設計に30%を確保しています。
+            </div>
+        </div>
+        
+        <!-- 3点見積法 -->
+        <div id="three-point" class="method-card fade-in">
+            <h2><span class="icon">📈</span>2. 3点見積法（PERT法）</h2>
+            
+            <div class="formula-visual">
+                <div class="formula-parts">
+                    <div class="formula-part">楽観値</div>
+                    <span class="operator">+</span>
+                    <div class="formula-part" style="background: var(--secondary-color); color: white;">4 × 最適値</div>
+                    <span class="operator">+</span>
+                    <div class="formula-part">悲観値</div>
+                    <span class="operator">÷</span>
+                    <div class="formula-part">6</div>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="700" height="300" viewBox="0 0 700 300">
+                    <!-- ベータ分布のイメージ -->
+                    <text x="350" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#005BAB">3点見積の確率分布</text>
+                    
+                    <!-- X軸 -->
+                    <line x1="50" y1="250" x2="650" y2="250" stroke="#333" stroke-width="2"/>
+                    <text x="50" y="270" font-size="12" fill="#333">楽観値(10日)</text>
+                    <text x="320" y="270" font-size="12" fill="#333">最適値(15日)</text>
+                    <text x="550" y="270" font-size="12" fill="#333">悲観値(30日)</text>
+                    
+                    <!-- ベータ分布曲線（簡略化） -->
+                    <path d="M 100,240 Q 250,100 350,80 Q 450,100 600,240" 
+                          fill="none" stroke="#005BAB" stroke-width="3"/>
+                    <path d="M 100,240 Q 250,100 350,80 Q 450,100 600,240 L 600,250 L 100,250 Z" 
+                          fill="#E0EEF9" opacity="0.5"/>
+                    
+                    <!-- 期待値線 -->
+                    <line x1="380" y1="80" x2="380" y2="250" stroke="#FF961C" stroke-width="3" stroke-dasharray="5,5"/>
+                    <text x="390" y="75" font-size="14" fill="#FF961C" font-weight="bold">期待値(16.7日)</text>
+                    
+                    <!-- 90%信頼区間 -->
+                    <rect x="280" y="80" width="200" height="170" fill="#4D8BC9" opacity="0.2"/>
+                    <text x="380" y="130" text-anchor="middle" font-size="12" fill="#005BAB">90%信頼区間</text>
+                    <text x="380" y="150" text-anchor="middle" font-size="11" fill="#005BAB">13.3日～20.0日</text>
+                </svg>
+            </div>
+            
+            <h3>係数の統計学的根拠</h3>
+            <div class="alert-box alert-success">
+                <h4>なぜ「4倍」と「6で除算」なのか？</h4>
+                <p><span class="tooltip">ベータ分布<span class="tooltiptext">プロジェクト管理で使用される確率分布。楽観的・最適・悲観的の3点から、最も起こりやすい値を統計的に算出。正規分布より現実的で、プロジェクトの不確実性をよく表現できる</span></span>の期待値計算式に基づいています。最も可能性の高い値（最適値）に4倍の重みを付けることで、極端な値の影響を抑制し、現実的な見積りを導出します。</p>
+            </div>
+            
+            <table class="interactive-table">
+                <tr>
+                    <th>統計値</th>
+                    <th>計算式</th>
+                    <th>意味</th>
+                </tr>
+                <tr>
+                    <td>期待値</td>
+                    <td><code>(O + 4M + P) ÷ 6</code></td>
+                    <td>最も期待される工数</td>
+                </tr>
+                <tr>
+                    <td>標準偏差</td>
+                    <td><code>(P - O) ÷ 6</code></td>
+                    <td>ばらつきの大きさ</td>
+                </tr>
+                <tr>
+                    <td>90%信頼区間</td>
+                    <td><code>期待値 ± 1.645 × 標準偏差</code></td>
+                    <td>90%の確率で収まる範囲</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- 機能点数法 -->
+        <div id="feature-point" class="method-card fade-in">
+            <h2><span class="icon">🔢</span>3. 機能点数法</h2>
+            
+            <!-- 簡易版 -->
+            <h3>3-1. 簡易版（社内SE向け）</h3>
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="800" height="400" viewBox="0 0 800 400">
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#005BAB">機能要素別の基本単価</text>
+                    
+                    <!-- 画面 -->
+                    <g transform="translate(100, 80)">
+                        <rect x="0" y="0" width="120" height="80" rx="10" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">画面</text>
+                        <text x="60" y="55" text-anchor="middle" font-size="24" font-weight="bold" fill="#FF961C">2.0</text>
+                        <text x="60" y="70" text-anchor="middle" font-size="12" fill="#666">人日/画面</text>
+                        
+                        <text x="60" y="100" text-anchor="middle" font-size="11" fill="#333">入力チェック</text>
+                        <text x="60" y="115" text-anchor="middle" font-size="11" fill="#333">画面遷移</text>
+                        <text x="60" y="130" text-anchor="middle" font-size="11" fill="#333">エラー処理</text>
+                    </g>
+                    
+                    <!-- 帳票 -->
+                    <g transform="translate(250, 80)">
+                        <rect x="0" y="0" width="120" height="80" rx="10" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">帳票</text>
+                        <text x="60" y="55" text-anchor="middle" font-size="24" font-weight="bold" fill="#FF961C">1.5</text>
+                        <text x="60" y="70" text-anchor="middle" font-size="12" fill="#666">人日/帳票</text>
+                        
+                        <text x="60" y="100" text-anchor="middle" font-size="11" fill="#333">レイアウト設計</text>
+                        <text x="60" y="115" text-anchor="middle" font-size="11" fill="#333">出力ロジック</text>
+                    </g>
+                    
+                    <!-- テーブル -->
+                    <g transform="translate(400, 80)">
+                        <rect x="0" y="0" width="120" height="80" rx="10" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">テーブル</text>
+                        <text x="60" y="55" text-anchor="middle" font-size="24" font-weight="bold" fill="#FF961C">1.5</text>
+                        <text x="60" y="70" text-anchor="middle" font-size="12" fill="#666">人日/テーブル</text>
+                        
+                        <text x="60" y="100" text-anchor="middle" font-size="11" fill="#333">正規化設計</text>
+                        <text x="60" y="115" text-anchor="middle" font-size="11" fill="#333">インデックス</text>
+                        <text x="60" y="130" text-anchor="middle" font-size="11" fill="#333">CRUD処理</text>
+                    </g>
+                    
+                    <!-- 外部I/F -->
+                    <g transform="translate(550, 80)">
+                        <rect x="0" y="0" width="120" height="80" rx="10" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">外部I/F</text>
+                        <text x="60" y="55" text-anchor="middle" font-size="24" font-weight="bold" fill="#FF961C">3.0</text>
+                        <text x="60" y="70" text-anchor="middle" font-size="12" fill="#666">人日/I/F</text>
+                        
+                        <text x="60" y="100" text-anchor="middle" font-size="11" fill="#333">仕様調整</text>
+                        <text x="60" y="115" text-anchor="middle" font-size="11" fill="#333">エラー処理</text>
+                        <text x="60" y="130" text-anchor="middle" font-size="11" fill="#333">結合テスト</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <!-- 正式版（ファンクションポイント法） -->
+            <h3>3-2. 正式版（ファンクションポイント法）</h3>
+            
+            <div class="formula-visual">
+                <div class="formula-parts">
+                    <div class="formula-part">未調整FP</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">技術的複雑度</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">生産性</div>
+                    <span class="operator">=</span>
+                    <div class="formula-part" style="background: var(--secondary-color); color: white;">工数</div>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="800" height="500" viewBox="0 0 800 500">
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#005BAB">ファンクションポイント法の5つの機能分類</text>
+                    
+                    <!-- EI: 外部入力 -->
+                    <g transform="translate(50, 80)">
+                        <rect x="0" y="0" width="140" height="100" rx="10" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+                        <text x="70" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#1976D2">EI: 外部入力</text>
+                        <text x="70" y="45" text-anchor="middle" font-size="11" fill="#333">データ入力画面</text>
+                        <text x="70" y="60" text-anchor="middle" font-size="11" fill="#333">マスタ登録</text>
+                        <text x="70" y="75" text-anchor="middle" font-size="11" fill="#333">トランザクション</text>
+                        
+                        <!-- 複雑度 -->
+                        <text x="70" y="105" text-anchor="middle" font-size="10" fill="#666">低3 中4 高6 FP</text>
+                    </g>
+                    
+                    <!-- EO: 外部出力 -->
+                    <g transform="translate(220, 80)">
+                        <rect x="0" y="0" width="140" height="100" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                        <text x="70" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#4CAF50">EO: 外部出力</text>
+                        <text x="70" y="45" text-anchor="middle" font-size="11" fill="#333">帳票出力</text>
+                        <text x="70" y="60" text-anchor="middle" font-size="11" fill="#333">レポート</text>
+                        <text x="70" y="75" text-anchor="middle" font-size="11" fill="#333">計算結果表示</text>
+                        
+                        <text x="70" y="105" text-anchor="middle" font-size="10" fill="#666">低4 中5 高7 FP</text>
+                    </g>
+                    
+                    <!-- EQ: 外部照会 -->
+                    <g transform="translate(390, 80)">
+                        <rect x="0" y="0" width="140" height="100" rx="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+                        <text x="70" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#FF9800">EQ: 外部照会</text>
+                        <text x="70" y="45" text-anchor="middle" font-size="11" fill="#333">検索画面</text>
+                        <text x="70" y="60" text-anchor="middle" font-size="11" fill="#333">一覧表示</text>
+                        <text x="70" y="75" text-anchor="middle" font-size="11" fill="#333">参照画面</text>
+                        
+                        <text x="70" y="105" text-anchor="middle" font-size="10" fill="#666">低3 中4 高6 FP</text>
+                    </g>
+                    
+                    <!-- ILF: 内部論理ファイル -->
+                    <g transform="translate(560, 80)">
+                        <rect x="0" y="0" width="140" height="100" rx="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+                        <text x="70" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#9C27B0">ILF: 内部論理F</text>
+                        <text x="70" y="45" text-anchor="middle" font-size="11" fill="#333">マスタテーブル</text>
+                        <text x="70" y="60" text-anchor="middle" font-size="11" fill="#333">トランザクション</text>
+                        <text x="70" y="75" text-anchor="middle" font-size="11" fill="#333">内部データ</text>
+                        
+                        <text x="70" y="105" text-anchor="middle" font-size="10" fill="#666">低7 中10 高15 FP</text>
+                    </g>
+                    
+                    <!-- EIF: 外部インターフェースファイル -->
+                    <g transform="translate(300, 210)">
+                        <rect x="0" y="0" width="140" height="100" rx="10" fill="#FFEBEE" stroke="#F44336" stroke-width="2"/>
+                        <text x="70" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#F44336">EIF: 外部I/F F</text>
+                        <text x="70" y="45" text-anchor="middle" font-size="11" fill="#333">他システム連携</text>
+                        <text x="70" y="60" text-anchor="middle" font-size="11" fill="#333">外部API</text>
+                        <text x="70" y="75" text-anchor="middle" font-size="11" fill="#333">参照マスタ</text>
+                        
+                        <text x="70" y="105" text-anchor="middle" font-size="10" fill="#666">低5 中7 高10 FP</text>
+                    </g>
+                    
+                    <!-- 複雑度判定基準 -->
+                    <g transform="translate(50, 350)">
+                        <text x="0" y="0" font-size="16" font-weight="bold" fill="#005BAB">複雑度の判定基準</text>
+                        
+                        <rect x="0" y="10" width="700" height="100" rx="10" fill="#F5F5F5" stroke="#999" stroke-width="1"/>
+                        
+                        <text x="20" y="35" font-size="12" font-weight="bold" fill="#333">トランザクション系（EI/EO/EQ）</text>
+                        <text x="20" y="55" font-size="11" fill="#666">• 参照ファイル数：1-2個（低）、2-3個（中）、4個以上（高）</text>
+                        <text x="20" y="70" font-size="11" fill="#666">• データ項目数：4-19項目（低）、20-50項目（中）、51項目以上（高）</text>
+                        
+                        <text x="20" y="95" font-size="12" font-weight="bold" fill="#333">データ系（ILF/EIF）</text>
+                        <text x="20" y="110" font-size="11" fill="#666">• レコード種類数とデータ項目数のマトリクスで判定</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3>技術的複雑度調整（TCF）</h3>
+            <table class="interactive-table">
+                <tr>
+                    <th>評価項目</th>
+                    <th>重み</th>
+                    <th>評価基準</th>
+                </tr>
+                <tr>
+                    <td><span class="tooltip">データ通信<span class="tooltiptext">システム間のデータ通信の度合い。オンライン処理、リアルタイム連携、バッチ転送などの通信要件</span></span></td>
+                    <td>0～5</td>
+                    <td>0:なし、3:標準的、5:複雑な通信</td>
+                </tr>
+                <tr>
+                    <td><span class="tooltip">分散処理<span class="tooltiptext">複数のサーバーやロケーションで処理を分散する度合い。クラウド環境、マイクロサービスなど</span></span></td>
+                    <td>0～5</td>
+                    <td>0:単一サーバー、3:一部分散、5:高度分散</td>
+                </tr>
+                <tr>
+                    <td><span class="tooltip">性能要件<span class="tooltiptext">レスポンスタイムやスループットなどの性能要求の厳しさ。ミリ秒単位の応答、大量同時処理など</span></span></td>
+                    <td>0～5</td>
+                    <td>0:通常、3:やや厳しい、5:非常に厳しい</td>
+                </tr>
+                <tr>
+                    <td><span class="tooltip">運用環境<span class="tooltiptext">本番環境の制約やリソースの制限。メモリ制限、CPU制限、24時間365日稼働要件など</span></span></td>
+                    <td>0～5</td>
+                    <td>0:制約なし、3:一部制約、5:厳しい制約</td>
+                </tr>
+                <tr>
+                    <td>トランザクション量</td>
+                    <td>0～5</td>
+                    <td>0:少量、3:中程度、5:大量処理</td>
+                </tr>
+            </table>
+            
+            <div class="formula-visual" style="margin-top: 1.5rem;">
+                <div class="formula-parts">
+                    <div class="formula-part">TCF = 0.65 + (0.01 × 影響度合計)</div>
+                </div>
+            </div>
+            
+            <h3>生産性の目安</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 25%; background: #4CAF50;">新規開発：8時間/FP</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 35%; background: #FF9800;">改修開発：11時間/FP</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%; background: #F44336;">保守作業：13時間/FP</div>
+            </div>
+            
+            <div class="alert-box alert-success">
+                <strong>ファンクションポイント法の利点：</strong>
+                <ul style="margin: 0.5rem 0;">
+                    <li>ユーザー視点での機能規模を測定（技術に依存しない）</li>
+                    <li>国際標準（ISO/IEC 20926）で客観性が高い</li>
+                    <li>要件定義段階で見積可能</li>
+                    <li>過去データの蓄積により精度向上</li>
+                </ul>
+            </div>
+            
+            <div class="alert-box alert-warning">
+                <strong>使い分けの指針：</strong>
+                <ul style="margin: 0.5rem 0;">
+                    <li><strong>簡易版</strong>：社内開発、小規模案件、概算見積</li>
+                    <li><strong>正式版</strong>：外部発注、大規模案件、契約ベースの見積</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 類似案件比較法 -->
+        <div id="comparison" class="method-card fade-in">
+            <h2><span class="icon">🔍</span>4. 類似案件比較法</h2>
+            
+            <div class="formula-visual">
+                <div class="formula-parts">
+                    <div class="formula-part">過去実績</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">規模係数</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">複雑度係数</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">要件明確度</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">チーム経験</div>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="800" height="400" viewBox="0 0 800 400">
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#005BAB">類似案件との比較分析</text>
+                    
+                    <!-- 過去案件の基準 -->
+                    <g transform="translate(100, 80)">
+                        <rect x="0" y="0" width="600" height="60" rx="10" fill="#E0EEF9" stroke="#005BAB" stroke-width="2"/>
+                        <text x="300" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#005BAB">過去案件（基準）</text>
+                        <text x="300" y="45" text-anchor="middle" font-size="12" fill="#333">ECサイト構築プロジェクト：30人日（画面10、テーブル5、標準複雑度）</text>
+                    </g>
+                    
+                    <!-- 比較要素 -->
+                    <g transform="translate(50, 180)">
+                        <!-- 規模比較 -->
+                        <g transform="translate(0, 0)">
+                            <text x="70" y="0" text-anchor="middle" font-size="14" font-weight="bold" fill="#005BAB">規模比較</text>
+                            <rect x="0" y="10" width="140" height="30" fill="#E0E0E0" stroke="#999" stroke-width="1"/>
+                            <rect x="0" y="10" width="84" height="30" fill="#4D8BC9"/>
+                            <text x="70" y="30" text-anchor="middle" font-size="12" fill="white">60%</text>
+                            <text x="70" y="55" text-anchor="middle" font-size="11" fill="#666">画面6、テーブル3</text>
+                        </g>
+                        
+                        <!-- 複雑度比較 -->
+                        <g transform="translate(170, 0)">
+                            <text x="70" y="0" text-anchor="middle" font-size="14" font-weight="bold" fill="#005BAB">複雑度</text>
+                            <rect x="0" y="10" width="140" height="30" fill="#E0E0E0" stroke="#999" stroke-width="1"/>
+                            <rect x="0" y="10" width="168" height="30" fill="#FF961C"/>
+                            <text x="70" y="30" text-anchor="middle" font-size="12" fill="white">120%</text>
+                            <text x="70" y="55" text-anchor="middle" font-size="11" fill="#666">やや複雑</text>
+                        </g>
+                        
+                        <!-- 要件明確度 -->
+                        <g transform="translate(340, 0)">
+                            <text x="70" y="0" text-anchor="middle" font-size="14" font-weight="bold" fill="#005BAB">要件明確度</text>
+                            <rect x="0" y="10" width="140" height="30" fill="#E0E0E0" stroke="#999" stroke-width="1"/>
+                            <rect x="0" y="10" width="140" height="30" fill="#616161"/>
+                            <text x="70" y="30" text-anchor="middle" font-size="12" fill="white">100%</text>
+                            <text x="70" y="55" text-anchor="middle" font-size="11" fill="#666">同程度</text>
+                        </g>
+                        
+                        <!-- チーム経験 -->
+                        <g transform="translate(510, 0)">
+                            <text x="70" y="0" text-anchor="middle" font-size="14" font-weight="bold" fill="#005BAB">チーム経験</text>
+                            <rect x="0" y="10" width="140" height="30" fill="#E0E0E0" stroke="#999" stroke-width="1"/>
+                            <rect x="0" y="10" width="112" height="30" fill="#4CAF50"/>
+                            <text x="70" y="30" text-anchor="middle" font-size="12" fill="white">80%</text>
+                            <text x="70" y="55" text-anchor="middle" font-size="11" fill="#666">経験豊富</text>
+                        </g>
+                    </g>
+                    
+                    <!-- 計算結果 -->
+                    <g transform="translate(200, 300)">
+                        <rect x="0" y="0" width="400" height="70" rx="10" fill="#FFF3E0" stroke="#FF961C" stroke-width="2"/>
+                        <text x="200" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">見積結果</text>
+                        <text x="200" y="50" text-anchor="middle" font-size="16" fill="#FF961C" font-weight="bold">
+                            30 × 0.6 × 1.2 × 1.0 × 0.8 = 17.3人日
+                        </text>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3>各係数の設定基準</h3>
+            <table class="interactive-table">
+                <tr>
+                    <th>係数種別</th>
+                    <th>範囲</th>
+                    <th>設定の目安</th>
+                </tr>
+                <tr>
+                    <td>規模係数</td>
+                    <td><span class="coefficient-badge coefficient-medium">0.6～2.0</span></td>
+                    <td>
+                        <ul style="margin: 0;">
+                            <li>0.6：40%削減（機能数が6割程度）</li>
+                            <li>1.0：同規模</li>
+                            <li>1.3：30%増加</li>
+                            <li>2.0：倍の規模（<span class="tooltip">規模の経済<span class="tooltiptext">規模が大きくなるにつれて、単位あたりのコストが下がる経済原理。共通部品の再利用やノウハウの蓄積により実現</span></span>で2倍にはならない）</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>複雑度係数</td>
+                    <td><span class="coefficient-badge coefficient-medium">0.7～1.5</span></td>
+                    <td>
+                        <ul style="margin: 0;">
+                            <li>0.7：大幅に単純（定型処理中心）</li>
+                            <li>0.9：やや単純</li>
+                            <li>1.2：やや複雑（業務ロジック増）</li>
+                            <li>1.5：大幅に複雑（アルゴリズム多用）</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>要件明確度</td>
+                    <td><span class="coefficient-badge coefficient-medium">0.9～1.4</span></td>
+                    <td>
+                        <ul style="margin: 0;">
+                            <li>0.9：過去より明確（仕様書完備）</li>
+                            <li>1.0：同程度</li>
+                            <li>1.2：やや不明確（手戻り想定）</li>
+                            <li>1.4：大幅に不明確（要件定義から）</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>チーム経験</td>
+                    <td><span class="coefficient-badge coefficient-medium">0.8～1.4</span></td>
+                    <td>
+                        <ul style="margin: 0;">
+                            <li>0.8：経験豊富（同じメンバー）</li>
+                            <li>1.0：標準的</li>
+                            <li>1.2：やや経験不足（新メンバー含む）</li>
+                            <li>1.4：大幅に経験不足（新技術・新チーム）</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+            
+            <div class="alert-box alert-warning">
+                <strong>類似案件選定のポイント：</strong>
+                <ul style="margin: 0.5rem 0;">
+                    <li>業務領域が同じか近い案件を選ぶ（ECサイト同士、基幹システム同士など）</li>
+                    <li>技術スタックが類似している案件を優先</li>
+                    <li>開発時期が近い案件（3年以内）を参考にする</li>
+                    <li>成功した案件の実績を基準とする（失敗案件は参考程度）</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- ステップ数見積法 -->
+        <div id="step-based" class="method-card fade-in">
+            <h2><span class="icon">📏</span>5. ステップ数見積法</h2>
+            
+            <div class="formula-visual">
+                <div class="formula-parts">
+                    <div class="formula-part">ステップ数</div>
+                    <span class="operator">÷</span>
+                    <div class="formula-part">生産性</div>
+                    <span class="operator">×</span>
+                    <div class="formula-part">複雑度</div>
+                    <span class="operator">+</span>
+                    <div class="formula-part">設計・テスト</div>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="800" height="350" viewBox="0 0 800 350">
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#005BAB">ステップ数による工数算出</text>
+                    
+                    <!-- 新規開発 -->
+                    <g transform="translate(50, 80)">
+                        <rect x="0" y="0" width="300" height="100" rx="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+                        <text x="150" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#4CAF50">新規開発</text>
+                        <text x="150" y="50" text-anchor="middle" font-size="14" fill="#333">1,000ステップ ÷ 50ステップ/人日</text>
+                        <text x="150" y="70" text-anchor="middle" font-size="18" font-weight="bold" fill="#4CAF50">= 20人日</text>
+                    </g>
+                    
+                    <!-- 修正作業 -->
+                    <g transform="translate(450, 80)">
+                        <rect x="0" y="0" width="300" height="100" rx="10" fill="#FFF3E0" stroke="#FF961C" stroke-width="2"/>
+                        <text x="150" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#FF961C">修正作業</text>
+                        <text x="150" y="50" text-anchor="middle" font-size="14" fill="#333">500ステップ ÷ 40ステップ/人日</text>
+                        <text x="150" y="70" text-anchor="middle" font-size="18" font-weight="bold" fill="#FF961C">= 12.5人日</text>
+                    </g>
+                    
+                    <!-- 生産性の違い -->
+                    <g transform="translate(100, 220)">
+                        <text x="300" y="0" text-anchor="middle" font-size="16" font-weight="bold" fill="#005BAB">修正作業の生産性が低い理由</text>
+                        
+                        <!-- 理由の円グラフ -->
+                        <g transform="translate(150, 50)">
+                            <!-- 既存コード理解 20% -->
+                            <path d="M 0,0 L 0,-50 A 50,50 0 0,1 47.02,-17.1 z" fill="#FFCDD2" stroke="#D32F2F" stroke-width="2"/>
+                            <text x="20" y="-30" font-size="10" fill="#333">理解20%</text>
+                            
+                            <!-- 影響調査 15% -->
+                            <path d="M 0,0 L 47.02,-17.1 A 50,50 0 0,1 50,0 z" fill="#FFE082" stroke="#F9A825" stroke-width="2"/>
+                            <text x="50" y="-5" font-size="10" fill="#333">調査15%</text>
+                            
+                            <!-- 退行テスト 10% -->
+                            <path d="M 0,0 L 50,0 A 50,50 0 0,1 40.45,29.39 z" fill="#C5E1A5" stroke="#689F38" stroke-width="2"/>
+                            <text x="45" y="20" font-size="10" fill="#333">テスト10%</text>
+                            
+                            <!-- 実装 55% -->
+                            <path d="M 0,0 L 40.45,29.39 A 50,50 0 1,1 0,-50 z" fill="#90CAF9" stroke="#1976D2" stroke-width="2"/>
+                            <text x="-30" y="10" font-size="10" fill="#333">実装55%</text>
+                        </g>
+                        
+                        <!-- 凡例 -->
+                        <g transform="translate(280, 30)">
+                            <rect x="0" y="0" width="15" height="15" fill="#FFCDD2"/>
+                            <text x="20" y="12" font-size="12" fill="#333">既存コード理解</text>
+                            
+                            <rect x="0" y="20" width="15" height="15" fill="#FFE082"/>
+                            <text x="20" y="32" font-size="12" fill="#333">影響範囲調査</text>
+                            
+                            <rect x="0" y="40" width="15" height="15" fill="#C5E1A5"/>
+                            <text x="20" y="52" font-size="12" fill="#333">退行テスト追加</text>
+                            
+                            <rect x="0" y="60" width="15" height="15" fill="#90CAF9"/>
+                            <text x="20" y="72" font-size="12" fill="#333">実装作業</text>
+                        </g>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3>生産性の基準値</h3>
+            <table class="interactive-table">
+                <tr>
+                    <th>作業種別</th>
+                    <th>生産性</th>
+                    <th>適用条件</th>
+                </tr>
+                <tr>
+                    <td>新規開発（低）</td>
+                    <td><span class="coefficient-badge coefficient-high">40 <span class="tooltip">ステップ<span class="tooltiptext">プログラムコードの行数。コメント行や空行を除いた、実際の処理を記述した行数を指す。言語により1行の重みが異なる</span></span>/人日</span></td>
+                    <td>複雑なロジック、多くのコメント記述必要</td>
+                </tr>
+                <tr>
+                    <td>新規開発（中）</td>
+                    <td><span class="coefficient-badge coefficient-medium">50 ステップ/人日</span></td>
+                    <td>標準的な業務処理</td>
+                </tr>
+                <tr>
+                    <td>新規開発（高）</td>
+                    <td><span class="coefficient-badge coefficient-low">70 ステップ/人日</span></td>
+                    <td>定型処理、フレームワーク活用</td>
+                </tr>
+                <tr>
+                    <td>新規開発（非常に高）</td>
+                    <td><span class="coefficient-badge coefficient-low">100 ステップ/人日</span></td>
+                    <td>単純な定型処理、コード生成ツール活用</td>
+                </tr>
+                <tr style="background-color: #FFF3E0;">
+                    <td>修正作業（低）</td>
+                    <td><span class="coefficient-badge coefficient-high">30 ステップ/人日</span></td>
+                    <td>複雑な既存システム、ドキュメント不足</td>
+                </tr>
+                <tr style="background-color: #FFF3E0;">
+                    <td>修正作業（中）</td>
+                    <td><span class="coefficient-badge coefficient-medium">40 ステップ/人日</span></td>
+                    <td>標準的な修正作業</td>
+                </tr>
+                <tr style="background-color: #FFF3E0;">
+                    <td>修正作業（高）</td>
+                    <td><span class="coefficient-badge coefficient-low">60 ステップ/人日</span></td>
+                    <td>単純な修正、ドキュメント完備</td>
+                </tr>
+            </table>
+            
+            <h3>追加工数の算出</h3>
+            <div class="progress-bar" style="margin-top: 1rem;">
+                <div class="progress-fill" style="width: 30%; background: #4D8BC9;">設計 30%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%; background: #FF961C;">開発 40%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 30%; background: #616161;">テスト 30%</div>
+            </div>
+            
+            <div class="alert-box alert-success">
+                <strong>設計・テスト工数の比率：</strong>
+                <ul style="margin: 0.5rem 0;">
+                    <li><strong>小規模・単純：</strong>設計30%、テスト30%（基本比率）</li>
+                    <li><strong>中規模・標準：</strong>設計40%、テスト40%（品質重視）</li>
+                    <li><strong>大規模・複雑：</strong>設計50%、テスト60%（設計重視）</li>
+                    <li><strong>高品質要求：</strong>設計60%、テスト80%（金融・医療等）</li>
+                </ul>
+                ※コーディング工数に対する比率
+            </div>
+        </div>
+        
+        <!-- 言語別調整 -->
+        <div id="language" class="method-card fade-in">
+            <h2><span class="icon">💻</span>6. プログラミング言語別の調整係数</h2>
+            
+            <div class="diagram-container">
+                <svg class="svg-diagram" width="800" height="450" viewBox="0 0 800 450">
+                    <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#005BAB">言語別の工数影響度</text>
+                    
+                    <!-- 基準線（100人日） -->
+                    <line x1="100" y1="350" x2="700" y2="350" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                    <text x="50" y="355" font-size="12" fill="#666">基準100</text>
+                    
+                    <!-- Y軸 -->
+                    <line x1="100" y1="80" x2="100" y2="380" stroke="#333" stroke-width="2"/>
+                    <text x="30" y="85" font-size="12" fill="#333">人日</text>
+                    <text x="50" y="105" font-size="12" fill="#333">260</text>
+                    <text x="50" y="155" font-size="12" fill="#333">200</text>
+                    <text x="50" y="255" font-size="12" fill="#333">100</text>
+                    
+                    <!-- 各言語のバー -->
+                    <!-- VB.NET: 80人日 -->
+                    <g transform="translate(150, 0)">
+                        <rect x="0" y="290" width="80" height="60" fill="#4CAF50" stroke="#388E3C" stroke-width="2"/>
+                        <text x="40" y="280" text-anchor="middle" font-size="14" font-weight="bold" fill="#4CAF50">80</text>
+                        <text x="40" y="370" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">VB.NET</text>
+                        <text x="40" y="385" text-anchor="middle" font-size="11" fill="#666">×0.8</text>
+                    </g>
+                    
+                    <!-- SQL: 90人日 -->
+                    <g transform="translate(260, 0)">
+                        <rect x="0" y="275" width="80" height="75" fill="#2196F3" stroke="#1976D2" stroke-width="2"/>
+                        <text x="40" y="265" text-anchor="middle" font-size="14" font-weight="bold" fill="#2196F3">90</text>
+                        <text x="40" y="370" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">SQL</text>
+                        <text x="40" y="385" text-anchor="middle" font-size="11" fill="#666">×0.9</text>
+                    </g>
+                    
+                    <!-- C言語: 195人日 -->
+                    <g transform="translate(370, 0)">
+                        <rect x="0" y="155" width="80" height="195" fill="#FF9800" stroke="#F57C00" stroke-width="2"/>
+                        <text x="40" y="145" text-anchor="middle" font-size="14" font-weight="bold" fill="#FF9800">195</text>
+                        <text x="40" y="370" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">C言語</text>
+                        <text x="40" y="385" text-anchor="middle" font-size="11" fill="#666">×1.95</text>
+                    </g>
+                    
+                    <!-- VB6.0: 225人日 -->
+                    <g transform="translate(480, 0)">
+                        <rect x="0" y="125" width="80" height="225" fill="#F44336" stroke="#D32F2F" stroke-width="2"/>
+                        <text x="40" y="115" text-anchor="middle" font-size="14" font-weight="bold" fill="#F44336">225</text>
+                        <text x="40" y="370" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">VB6.0</text>
+                        <text x="40" y="385" text-anchor="middle" font-size="11" fill="#666">×2.25</text>
+                    </g>
+                    
+                    <!-- LISP: 260人日 -->
+                    <g transform="translate(590, 0)">
+                        <rect x="0" y="90" width="80" height="260" fill="#9C27B0" stroke="#7B1FA2" stroke-width="2"/>
+                        <text x="40" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#9C27B0">260</text>
+                        <text x="40" y="370" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">LISP</text>
+                        <text x="40" y="385" text-anchor="middle" font-size="11" fill="#666">×2.6</text>
+                    </g>
+                    
+                    <!-- 注釈 -->
+                    <text x="400" y="420" text-anchor="middle" font-size="12" fill="#666">※ 基本見積100人日の場合の調整後工数</text>
+                </svg>
+            </div>
+            
+            <h3>言語別の特性と考慮事項</h3>
+            <table class="interactive-table">
+                <tr>
+                    <th>言語</th>
+                    <th>総合係数</th>
+                    <th>主な課題</th>
+                    <th>対策</th>
+                </tr>
+                <tr style="background-color: #E8F5E9;">
+                    <td><strong>VB.NET</strong></td>
+                    <td><span class="coefficient-badge coefficient-low">×0.8</span></td>
+                    <td><span class="tooltip">.NET Framework<span class="tooltiptext">Microsoftが開発した統合開発環境。豊富なライブラリ、自動メモリ管理、言語間の相互運用性などを提供。Visual Studioと組み合わせて高い生産性を実現</span></span>の恩恵で生産性高</td>
+                    <td>特になし（推奨言語）</td>
+                </tr>
+                <tr>
+                    <td><strong>SQL</strong></td>
+                    <td><span class="coefficient-badge coefficient-low">×0.9</span></td>
+                    <td>複雑な<span class="tooltip">JOIN<span class="tooltiptext">複数のテーブルを結合してデータを取得するSQL文。INNER JOIN（内部結合）、LEFT JOIN（左外部結合）、RIGHT JOIN（右外部結合）などがある。複雑になると性能問題が発生しやすい</span></span>、<span class="tooltip">パフォーマンスチューニング<span class="tooltiptext">プログラムの実行速度を改善する作業。SQLではインデックス追加、クエリ最適化、実行計画の分析などを行う。大量データでは必須の作業</span></span></td>
+                    <td>性能テスト工数を別途追加（+10%）</td>
+                </tr>
+                <tr style="background-color: #FFF3E0;">
+                    <td><strong>C言語</strong></td>
+                    <td><span class="coefficient-badge coefficient-high">×1.95</span></td>
+                    <td><span class="tooltip">メモリ管理<span class="tooltiptext">プログラムが使用するメモリの確保（malloc）と解放（free）を手動で行うこと。忘れるとメモリリークが発生し、システムが不安定になる</span></span>、<span class="tooltip">ポインタ<span class="tooltiptext">メモリ上のアドレスを格納する変数。C言語の強力な機能だが、誤用によるバグ（セグメンテーション違反、バッファオーバーフロー）の原因になりやすい</span></span>バグ</td>
+                    <td>セキュリティレビュー追加（+15%）</td>
+                </tr>
+                <tr style="background-color: #FFEBEE;">
+                    <td><strong>VB6.0</strong></td>
+                    <td><span class="coefficient-badge coefficient-high">×2.25</span></td>
+                    <td><span class="tooltip">レガシー言語<span class="tooltiptext">既に古くなった技術だが、既存システムで使われ続けている言語。VB6.0は2008年にサポート終了。新規開発は推奨されないが、多くの企業で保守が必要</span></span>、開発者不足、<span class="tooltip">IDE<span class="tooltiptext">統合開発環境（Integrated Development Environment）。コード編集、デバッグ、ビルドなどを統合したツール。VB6.0のIDEは最新OSでは動作しない場合がある</span></span>サポート終了</td>
+                    <td>ドキュメント強化（+20%）、引き継ぎ重視</td>
+                </tr>
+                <tr style="background-color: #FFEBEE;">
+                    <td><strong>LISP</strong></td>
+                    <td><span class="coefficient-badge coefficient-high">×2.6</span></td>
+                    <td><span class="tooltip">関数型プログラミング<span class="tooltiptext">関数の組み合わせでプログラムを構築する手法。副作用がなく並列処理に適しているが、手続き型に慣れた開発者には習得が困難。数学的思考が必要</span></span>、<span class="tooltip">S式<span class="tooltiptext">LISPの基本的な記法。すべてを括弧で囲んだリスト形式で表現。例：(+ 1 2)は1+2を意味。括弧の数が多く可読性に難がある</span></span>の可読性</td>
+                    <td>専門家確保必須、ドキュメント強化（+20%）</td>
+                </tr>
+            </table>
+            
+            <div class="alert-box alert-danger">
+                <strong>重要な選定基準：</strong>
+                <p>技術的側面だけでなく、以下も考慮してください：</p>
+                <ul style="margin: 0.5rem 0;">
+                    <li>チームのスキルセット（習得コストを含む）</li>
+                    <li>長期的な保守体制（5年後も開発者を確保できるか）</li>
+                    <li>セキュリティサポートの継続性</li>
+                    <li>開発ツールの入手性・ライセンスコスト</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 工数計算シミュレーター -->
+        <div id="simulator" class="method-card fade-in">
+            <h2><span class="icon">🧮</span>7. 工数計算シミュレーター</h2>
+            
+            <div class="calculator">
+                <h3>見積手法を選んで計算してみよう</h3>
+                
+                <div class="calc-input">
+                    <label>見積手法：</label>
+                    <select id="calc-method" onchange="switchCalculator()">
+                        <option value="simple" selected>簡易見積法</option>
+                        <option value="fp-simple">機能点数法（簡易版）</option>
+                        <option value="fp-formal">機能点数法（正式版）</option>
+                        <option value="comparison">類似案件比較法</option>
+                        <option value="step">ステップ数見積法</option>
+                    </select>
+                </div>
+                
+                <!-- 簡易見積法の入力 -->
+                <div id="simple-calc" class="calc-method">
+                    <h4>簡易見積法</h4>
+                    <div class="calc-input">
+                        <label>画面数：</label>
+                        <input type="number" id="calc-screens" value="5" min="1" max="100">
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>複雑度：</label>
+                        <select id="calc-complexity">
+                            <option value="0.7">低（単純なCRUD）</option>
+                            <option value="1" selected>中（標準的な業務）</option>
+                            <option value="1.5">高（複雑な処理）</option>
+                            <option value="2">非常に高（リアルタイム等）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>使用言語：</label>
+                        <select id="calc-language">
+                            <option value="0.8">VB.NET</option>
+                            <option value="0.9">SQL</option>
+                            <option value="1.95">C言語</option>
+                            <option value="2.25">VB6.0</option>
+                            <option value="2.6">LISP</option>
+                            <option value="1" selected>その他（調整なし）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>リスクバッファ：</label>
+                        <select id="calc-risk">
+                            <option value="1.1">10%（要件明確）</option>
+                            <option value="1.2" selected>20%（標準）</option>
+                            <option value="1.3">30%（一部不明確）</option>
+                            <option value="1.5">50%（大部分不明確）</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 機能点数法（簡易版）の入力 -->
+                <div id="fp-simple-calc" class="calc-method" style="display: none;">
+                    <h4>機能点数法（簡易版）</h4>
+                    <div class="calc-input">
+                        <label>画面数：</label>
+                        <input type="number" id="calc-fp-screens" value="5" min="0" max="100">
+                        <span>× 2人日 = <span id="fp-screens-total">10</span>人日</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>帳票数：</label>
+                        <input type="number" id="calc-fp-reports" value="2" min="0" max="100">
+                        <span>× 1.5人日 = <span id="fp-reports-total">3</span>人日</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>テーブル数：</label>
+                        <input type="number" id="calc-fp-tables" value="3" min="0" max="100">
+                        <span>× 1.5人日 = <span id="fp-tables-total">4.5</span>人日</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>外部I/F数：</label>
+                        <input type="number" id="calc-fp-interfaces" value="1" min="0" max="100">
+                        <span>× 3人日 = <span id="fp-interfaces-total">3</span>人日</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>複雑度係数：</label>
+                        <select id="calc-fp-complexity">
+                            <option value="0.8">低（単純、既存技術）</option>
+                            <option value="1" selected>中（標準的）</option>
+                            <option value="1.3">高（複雑、新技術）</option>
+                            <option value="1.6">非常に高（高度に複雑）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>リスクバッファ：</label>
+                        <select id="calc-fp-risk">
+                            <option value="1.1">10%（要件明確）</option>
+                            <option value="1.2" selected>20%（標準）</option>
+                            <option value="1.3">30%（一部不明確）</option>
+                            <option value="1.5">50%（大部分不明確）</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 機能点数法（正式版）の入力 -->
+                <div id="fp-formal-calc" class="calc-method" style="display: none;">
+                    <h4>機能点数法（正式版）</h4>
+                    <div class="calc-input">
+                        <label>EI（外部入力）：</label>
+                        <input type="number" id="calc-ei-low" value="3" min="0" max="100" placeholder="低">
+                        <input type="number" id="calc-ei-mid" value="2" min="0" max="100" placeholder="中">
+                        <input type="number" id="calc-ei-high" value="1" min="0" max="100" placeholder="高">
+                        <span style="font-size: 0.9rem;">低/中/高</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>EO（外部出力）：</label>
+                        <input type="number" id="calc-eo-low" value="2" min="0" max="100" placeholder="低">
+                        <input type="number" id="calc-eo-mid" value="1" min="0" max="100" placeholder="中">
+                        <input type="number" id="calc-eo-high" value="0" min="0" max="100" placeholder="高">
+                        <span style="font-size: 0.9rem;">低/中/高</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>EQ（外部照会）：</label>
+                        <input type="number" id="calc-eq-low" value="2" min="0" max="100" placeholder="低">
+                        <input type="number" id="calc-eq-mid" value="1" min="0" max="100" placeholder="中">
+                        <input type="number" id="calc-eq-high" value="0" min="0" max="100" placeholder="高">
+                        <span style="font-size: 0.9rem;">低/中/高</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>ILF（内部論理F）：</label>
+                        <input type="number" id="calc-ilf-low" value="2" min="0" max="100" placeholder="低">
+                        <input type="number" id="calc-ilf-mid" value="1" min="0" max="100" placeholder="中">
+                        <input type="number" id="calc-ilf-high" value="0" min="0" max="100" placeholder="高">
+                        <span style="font-size: 0.9rem;">低/中/高</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>EIF（外部I/F F）：</label>
+                        <input type="number" id="calc-eif-low" value="1" min="0" max="100" placeholder="低">
+                        <input type="number" id="calc-eif-mid" value="0" min="0" max="100" placeholder="中">
+                        <input type="number" id="calc-eif-high" value="0" min="0" max="100" placeholder="高">
+                        <span style="font-size: 0.9rem;">低/中/高</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>技術的複雑度：</label>
+                        <input type="number" id="calc-tcf" value="35" min="0" max="70">
+                        <span style="font-size: 0.9rem;">（0-70の合計値）</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>生産性：</label>
+                        <select id="calc-productivity">
+                            <option value="8">高（8時間/FP）新規開発</option>
+                            <option value="11" selected>中（11時間/FP）改修開発</option>
+                            <option value="13">低（13時間/FP）保守作業</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 類似案件比較法の入力 -->
+                <div id="comparison-calc" class="calc-method" style="display: none;">
+                    <h4>類似案件比較法</h4>
+                    <div class="calc-input">
+                        <label>過去案件の実績：</label>
+                        <input type="number" id="calc-past-effort" value="30" min="1" max="1000">
+                        <span>人日</span>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>規模比較：</label>
+                        <select id="calc-size-factor">
+                            <option value="0.6">60%（大幅に小さい）</option>
+                            <option value="0.8">80%（やや小さい）</option>
+                            <option value="1" selected>100%（同程度）</option>
+                            <option value="1.3">130%（やや大きい）</option>
+                            <option value="1.6">160%（大幅に大きい）</option>
+                            <option value="2.0">200%（倍の規模）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>複雑度比較：</label>
+                        <select id="calc-comp-complexity">
+                            <option value="0.7">70%（大幅に単純）</option>
+                            <option value="0.9">90%（やや単純）</option>
+                            <option value="1" selected>100%（同程度）</option>
+                            <option value="1.2">120%（やや複雑）</option>
+                            <option value="1.5">150%（大幅に複雑）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>要件明確度：</label>
+                        <select id="calc-requirement">
+                            <option value="0.9">90%（より明確）</option>
+                            <option value="1" selected>100%（同程度）</option>
+                            <option value="1.2">120%（やや不明確）</option>
+                            <option value="1.4">140%（大幅に不明確）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>チーム経験：</label>
+                        <select id="calc-team-exp">
+                            <option value="0.8">80%（より経験豊富）</option>
+                            <option value="1" selected>100%（同程度）</option>
+                            <option value="1.2">120%（やや経験不足）</option>
+                            <option value="1.4">140%（大幅に経験不足）</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- ステップ数見積法の入力 -->
+                <div id="step-calc" class="calc-method" style="display: none;">
+                    <h4>ステップ数見積法</h4>
+                    <div class="calc-input">
+                        <label>新規開発ステップ数：</label>
+                        <input type="number" id="calc-new-steps" value="1000" min="0" max="100000">
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>修正ステップ数：</label>
+                        <input type="number" id="calc-modify-steps" value="500" min="0" max="100000">
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>新規開発生産性：</label>
+                        <select id="calc-new-productivity">
+                            <option value="40">低（40ステップ/人日）</option>
+                            <option value="50" selected>中（50ステップ/人日）</option>
+                            <option value="70">高（70ステップ/人日）</option>
+                            <option value="100">非常に高（100ステップ/人日）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>修正作業生産性：</label>
+                        <select id="calc-modify-productivity">
+                            <option value="30">低（30ステップ/人日）</option>
+                            <option value="40" selected>中（40ステップ/人日）</option>
+                            <option value="60">高（60ステップ/人日）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>設計工数比率：</label>
+                        <select id="calc-design-ratio">
+                            <option value="0.3">30%（小規模・単純）</option>
+                            <option value="0.4" selected>40%（中規模・標準）</option>
+                            <option value="0.5">50%（大規模・複雑）</option>
+                            <option value="0.6">60%（非常に複雑）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-input">
+                        <label>テスト工数比率：</label>
+                        <select id="calc-test-ratio">
+                            <option value="0.3">30%（小規模・単純）</option>
+                            <option value="0.4" selected>40%（中規模・標準）</option>
+                            <option value="0.6">60%（大規模・複雑）</option>
+                            <option value="0.8">80%（高品質要求）</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="calc-button" onclick="calculateEstimate()">工数を計算</button>
+                
+                <div id="calc-result" class="calc-result">
+                    <!-- 計算結果がここに表示される -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 共通ルール -->
+        <div class="method-card fade-in">
+            <h2><span class="icon">📋</span>8. 見積り成功のための共通ルール</h2>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 20%;">リスクバッファ 20%（標準）</div>
+            </div>
+            
+            <table class="interactive-table">
+                <tr>
+                    <th>バッファ率</th>
+                    <th>適用条件</th>
+                    <th>具体的な状況</th>
+                </tr>
+                <tr>
+                    <td><span class="coefficient-badge coefficient-low">10%</span></td>
+                    <td>要件確定済み、経験豊富なチーム</td>
+                    <td>過去に同様のシステムを開発、仕様書完備、技術検証済み</td>
+                </tr>
+                <tr>
+                    <td><span class="coefficient-badge coefficient-medium">20%</span></td>
+                    <td>標準的なプロジェクト（推奨）</td>
+                    <td>一般的な業務システム、部分的に新規要素あり</td>
+                </tr>
+                <tr>
+                    <td><span class="coefficient-badge coefficient-high">30%</span></td>
+                    <td>新規顧客、新技術採用</td>
+                    <td>初めての顧客、新フレームワーク導入、チーム再編成</td>
+                </tr>
+                <tr>
+                    <td><span class="coefficient-badge coefficient-high">50%</span></td>
+                    <td>要件未確定、技術検証未完</td>
+                    <td>企画段階、POC必要、業務フロー未確定</td>
+                </tr>
+            </table>
+            
+            <div class="alert-box alert-success">
+                <h4>見積り精度向上のポイント</h4>
+                <ul style="margin: 0.5rem 0;">
+                    <li><strong>複数手法の併用：</strong>最低2つ以上の手法で見積り、結果を比較検討</li>
+                    <li><strong>過去実績の活用：</strong>類似案件の実績データを蓄積・参照</li>
+                    <li><strong>段階的見積り：</strong>要件定義後に再見積りを実施</li>
+                    <li><strong>バッファの可視化：</strong>リスクバッファを明示的に提示</li>
+                    <li><strong>前提条件の明記：</strong>見積りの前提条件を文書化</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 機能点数法（簡易版）の動的計算
+        document.getElementById('calc-fp-screens').addEventListener('input', function() {
+            const screens = parseFloat(this.value) || 0;
+            document.getElementById('fp-screens-total').textContent = (screens * 2).toFixed(1);
+        });
+        
+        document.getElementById('calc-fp-reports').addEventListener('input', function() {
+            const reports = parseFloat(this.value) || 0;
+            document.getElementById('fp-reports-total').textContent = (reports * 1.5).toFixed(1);
+        });
+        
+        document.getElementById('calc-fp-tables').addEventListener('input', function() {
+            const tables = parseFloat(this.value) || 0;
+            document.getElementById('fp-tables-total').textContent = (tables * 1.5).toFixed(1);
+        });
+        
+        document.getElementById('calc-fp-interfaces').addEventListener('input', function() {
+            const interfaces = parseFloat(this.value) || 0;
+            document.getElementById('fp-interfaces-total').textContent = (interfaces * 3).toFixed(1);
+        });
+        
+        // 計算方法切り替え
+        function switchCalculator() {
+            const method = document.getElementById('calc-method').value;
+            document.querySelectorAll('.calc-method').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById(method + '-calc').style.display = 'block';
+        }
+        
+        // 計算シミュレーター
+        function calculateEstimate() {
+            const method = document.getElementById('calc-method').value;
+            let resultHTML = '';
+            
+            if (method === 'simple') {
+                // 簡易見積法
+                const screens = parseFloat(document.getElementById('calc-screens').value);
+                const complexity = parseFloat(document.getElementById('calc-complexity').value);
+                const language = parseFloat(document.getElementById('calc-language').value);
+                const risk = parseFloat(document.getElementById('calc-risk').value);
+                
+                const baseEffort = screens * 3;
+                const adjustedEffort = baseEffort * complexity * language * risk;
+                
+                const analysis = adjustedEffort * 0.3;
+                const development = adjustedEffort * 0.4;
+                const testing = adjustedEffort * 0.3;
+                
+                resultHTML = `
+                    <h4>簡易見積法の計算結果</h4>
+                    <p>基本工数：${baseEffort.toFixed(1)} 人日（${screens}画面 × 3人日）</p>
+                    <p>調整後工数：<strong style="color: var(--secondary-color); font-size: 1.5rem;">${adjustedEffort.toFixed(1)} 人日</strong></p>
+                    <hr style="margin: 1rem 0;">
+                    <p>内訳：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>要件分析・設計：${analysis.toFixed(1)} 人日</li>
+                        <li>開発：${development.toFixed(1)} 人日</li>
+                        <li>テスト：${testing.toFixed(1)} 人日</li>
+                    </ul>
+                `;
+            } else if (method === 'fp-simple') {
+                // 機能点数法（簡易版）
+                const screens = parseFloat(document.getElementById('calc-fp-screens').value) || 0;
+                const reports = parseFloat(document.getElementById('calc-fp-reports').value) || 0;
+                const tables = parseFloat(document.getElementById('calc-fp-tables').value) || 0;
+                const interfaces = parseFloat(document.getElementById('calc-fp-interfaces').value) || 0;
+                const complexity = parseFloat(document.getElementById('calc-fp-complexity').value);
+                const risk = parseFloat(document.getElementById('calc-fp-risk').value);
+                
+                const baseEffort = (screens * 2) + (reports * 1.5) + (tables * 1.5) + (interfaces * 3);
+                const adjustedEffort = baseEffort * complexity * risk;
+                
+                const analysis = adjustedEffort * 0.3;
+                const development = adjustedEffort * 0.4;
+                const testing = adjustedEffort * 0.2;
+                const deployment = adjustedEffort * 0.1;
+                
+                resultHTML = `
+                    <h4>機能点数法（簡易版）の計算結果</h4>
+                    <p>基本工数内訳：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>画面：${(screens * 2).toFixed(1)} 人日</li>
+                        <li>帳票：${(reports * 1.5).toFixed(1)} 人日</li>
+                        <li>テーブル：${(tables * 1.5).toFixed(1)} 人日</li>
+                        <li>外部I/F：${(interfaces * 3).toFixed(1)} 人日</li>
+                    </ul>
+                    <p>基本工数計：${baseEffort.toFixed(1)} 人日</p>
+                    <p>調整後工数：<strong style="color: var(--secondary-color); font-size: 1.5rem;">${adjustedEffort.toFixed(1)} 人日</strong></p>
+                    <hr style="margin: 1rem 0;">
+                    <p>フェーズ別内訳：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>要件分析・設計：${analysis.toFixed(1)} 人日（30%）</li>
+                        <li>開発：${development.toFixed(1)} 人日（40%）</li>
+                        <li>テスト：${testing.toFixed(1)} 人日（20%）</li>
+                        <li>導入・運用準備：${deployment.toFixed(1)} 人日（10%）</li>
+                    </ul>
+                `;
+            } else if (method === 'fp-formal') {
+                // 機能点数法（正式版）
+                const ei_low = parseFloat(document.getElementById('calc-ei-low').value) || 0;
+                const ei_mid = parseFloat(document.getElementById('calc-ei-mid').value) || 0;
+                const ei_high = parseFloat(document.getElementById('calc-ei-high').value) || 0;
+                const eo_low = parseFloat(document.getElementById('calc-eo-low').value) || 0;
+                const eo_mid = parseFloat(document.getElementById('calc-eo-mid').value) || 0;
+                const eo_high = parseFloat(document.getElementById('calc-eo-high').value) || 0;
+                const eq_low = parseFloat(document.getElementById('calc-eq-low').value) || 0;
+                const eq_mid = parseFloat(document.getElementById('calc-eq-mid').value) || 0;
+                const eq_high = parseFloat(document.getElementById('calc-eq-high').value) || 0;
+                const ilf_low = parseFloat(document.getElementById('calc-ilf-low').value) || 0;
+                const ilf_mid = parseFloat(document.getElementById('calc-ilf-mid').value) || 0;
+                const ilf_high = parseFloat(document.getElementById('calc-ilf-high').value) || 0;
+                const eif_low = parseFloat(document.getElementById('calc-eif-low').value) || 0;
+                const eif_mid = parseFloat(document.getElementById('calc-eif-mid').value) || 0;
+                const eif_high = parseFloat(document.getElementById('calc-eif-high').value) || 0;
+                
+                const tcfValue = parseFloat(document.getElementById('calc-tcf').value) || 0;
+                const productivity = parseFloat(document.getElementById('calc-productivity').value);
+                
+                // FP計算
+                const eiFP = (ei_low * 3) + (ei_mid * 4) + (ei_high * 6);
+                const eoFP = (eo_low * 4) + (eo_mid * 5) + (eo_high * 7);
+                const eqFP = (eq_low * 3) + (eq_mid * 4) + (eq_high * 6);
+                const ilfFP = (ilf_low * 7) + (ilf_mid * 10) + (ilf_high * 15);
+                const eifFP = (eif_low * 5) + (eif_mid * 7) + (eif_high * 10);
+                
+                const unadjustedFP = eiFP + eoFP + eqFP + ilfFP + eifFP;
+                const tcf = 0.65 + (0.01 * tcfValue);
+                const adjustedFP = unadjustedFP * tcf;
+                const totalHours = adjustedFP * productivity;
+                const totalDays = totalHours / 8;
+                
+                resultHTML = `
+                    <h4>機能点数法（正式版）の計算結果</h4>
+                    <p>機能別FP：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>EI（外部入力）：${eiFP} FP</li>
+                        <li>EO（外部出力）：${eoFP} FP</li>
+                        <li>EQ（外部照会）：${eqFP} FP</li>
+                        <li>ILF（内部論理F）：${ilfFP} FP</li>
+                        <li>EIF（外部I/F F）：${eifFP} FP</li>
+                    </ul>
+                    <p>未調整FP：${unadjustedFP} FP</p>
+                    <p>TCF（技術的複雑度）：${tcf.toFixed(2)}</p>
+                    <p>調整後FP：${adjustedFP.toFixed(1)} FP</p>
+                    <p>総工数：${totalHours.toFixed(0)} 時間（${productivity}時間/FP）</p>
+                    <p>見積工数：<strong style="color: var(--secondary-color); font-size: 1.5rem;">${totalDays.toFixed(1)} 人日</strong></p>
+                `;
+            } else if (method === 'comparison') {
+                // 類似案件比較法
+                const pastEffort = parseFloat(document.getElementById('calc-past-effort').value);
+                const sizeFactor = parseFloat(document.getElementById('calc-size-factor').value);
+                const complexityFactor = parseFloat(document.getElementById('calc-comp-complexity').value);
+                const requirementFactor = parseFloat(document.getElementById('calc-requirement').value);
+                const teamExpFactor = parseFloat(document.getElementById('calc-team-exp').value);
+                
+                const totalEffort = pastEffort * sizeFactor * complexityFactor * requirementFactor * teamExpFactor;
+                
+                resultHTML = `
+                    <h4>類似案件比較法の計算結果</h4>
+                    <p>過去案件実績：${pastEffort} 人日</p>
+                    <p>調整係数：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>規模：×${sizeFactor}</li>
+                        <li>複雑度：×${complexityFactor}</li>
+                        <li>要件明確度：×${requirementFactor}</li>
+                        <li>チーム経験：×${teamExpFactor}</li>
+                    </ul>
+                    <p>見積工数：<strong style="color: var(--secondary-color); font-size: 1.5rem;">${totalEffort.toFixed(1)} 人日</strong></p>
+                `;
+            } else if (method === 'step') {
+                // ステップ数見積法
+                const newSteps = parseFloat(document.getElementById('calc-new-steps').value);
+                const modifySteps = parseFloat(document.getElementById('calc-modify-steps').value);
+                const newProductivity = parseFloat(document.getElementById('calc-new-productivity').value);
+                const modifyProductivity = parseFloat(document.getElementById('calc-modify-productivity').value);
+                const designRatio = parseFloat(document.getElementById('calc-design-ratio').value);
+                const testRatio = parseFloat(document.getElementById('calc-test-ratio').value);
+                
+                const newCoding = newSteps / newProductivity;
+                const modifyCoding = modifySteps / modifyProductivity;
+                const totalCoding = newCoding + modifyCoding;
+                const design = totalCoding * designRatio;
+                const test = totalCoding * testRatio;
+                const total = totalCoding + design + test;
+                
+                resultHTML = `
+                    <h4>ステップ数見積法の計算結果</h4>
+                    <p>コーディング工数：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>新規開発：${newCoding.toFixed(1)} 人日（${newSteps}÷${newProductivity}）</li>
+                        <li>修正作業：${modifyCoding.toFixed(1)} 人日（${modifySteps}÷${modifyProductivity}）</li>
+                    </ul>
+                    <p>追加工数：</p>
+                    <ul style="margin: 0.5rem 0;">
+                        <li>設計：${design.toFixed(1)} 人日（${(designRatio*100).toFixed(0)}%）</li>
+                        <li>テスト：${test.toFixed(1)} 人日（${(testRatio*100).toFixed(0)}%）</li>
+                    </ul>
+                    <p>合計工数：<strong style="color: var(--secondary-color); font-size: 1.5rem;">${total.toFixed(1)} 人日</strong></p>
+                `;
+            }
+            
+            const resultDiv = document.getElementById('calc-result');
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.classList.add('show');
+        }
+        
+        // 初期アニメーション
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.method-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+        
+        // プログレスバーのアニメーション
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社内SE開発工数見積ツール</title>
+    <style>
+        :root {
+            --primary-color: #005BAB;
+            --secondary-color: #FF961C;
+            --light-blue: #E0EEF9;
+            --medium-blue: #4D8BC9;
+            --neutral-grey: #F5F5F5;
+            --dark-grey: #616161;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+        }
+        
+        body {
+            font-family: Meiryo, "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-dark);
+            background-color: #FFFFFF;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input[type="number"], 
+        input[type="text"],
+        input[type="date"],
+        select, 
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .input-group input {
+            flex: 1;
+        }
+        
+        .input-group span {
+            white-space: nowrap;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: #004a8c;
+        }
+        
+        .btn-secondary {
+            background-color: var(--medium-blue);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3d7ab5;
+        }
+        
+        .btn-orange {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-orange:hover {
+            background-color: #e68a19;
+        }
+        
+        .btn-grey {
+            background-color: var(--dark-grey);
+        }
+        
+        .btn-grey:hover {
+            background-color: #4d4d4d;
+        }
+        
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .result-table th, .result-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .result-table th {
+            background-color: var(--light-blue);
+            color: var(--primary-color);
+        }
+        
+        .result-table tr:nth-child(even) {
+            background-color: var(--neutral-grey);
+        }
+        
+        .warning {
+            background-color: #FFF3E0;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .help-text {
+            font-size: 0.9rem;
+            color: var(--dark-grey);
+            margin-top: 0.5rem;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 0.5rem;
+            margin-bottom: -1px;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 2rem;
+        }
+        
+        .estimate-form {
+            background-color: white;
+            padding: 2rem;
+            border: 1px solid #ddd;
+        }
+        
+        .estimate-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .estimate-header h2 {
+            font-size: 1.8rem;
+            border: none;
+        }
+        
+        .estimate-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .estimate-info-item {
+            flex: 1;
+        }
+        
+        .estimate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        
+        .estimate-table th, .estimate-table td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+        }
+        
+        .estimate-table th {
+            background-color: var(--light-blue);
+            text-align: center;
+        }
+        
+        .estimate-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .estimate-footer {
+            margin-top: 2rem;
+        }
+        
+        .estimate-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+        
+        .editable {
+            background-color: #ffffd7;
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+        
+        .editable:focus {
+            outline: 2px solid var(--medium-blue);
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            header, .tabs, .card:not(.print-area) {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .input-group input {
+                width: 100%;
+            }
+            
+            .estimate-info {
+                flex-direction: column;
+            }
+            
+            .estimate-info-item {
+                margin-bottom: 1rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-bottom: 0.2rem;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>社内SE開発工数見積ツール</h1>
+    </header>
+    
+    <div class="container">
+        <div class="warning">
+            <strong>注意:</strong> このツールは概算値を算出するためのものです。実際の開発工数は要件や環境により大きく異なる場合があります。
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('simple-method')">簡易見積法</div>
+            <div class="tab" onclick="switchTab('three-point')">3点見積法</div>
+            <div class="tab" onclick="switchTab('feature-point')">機能点数法</div>
+            <div class="tab" onclick="switchTab('comparison')">類似案件比較法</div>
+            <div class="tab" onclick="switchTab('step-based')">ステップ数見積法</div>
+            <div class="tab" onclick="switchTab('estimate-sheet')">見積書形式</div>
+        </div>
+        
+        <!-- 簡易見積法 -->
+        <div id="simple-method" class="tab-content active">
+            <div class="card">
+                <h2>簡易見積法</h2>
+                <p>画面数や機能数からざっくりと工数を算出する方法です。初期段階の概算に適しています。</p>
+                
+                <div class="form-group">
+                    <label for="simple-screens">画面数</label>
+                    <input type="number" id="simple-screens" min="0" value="5">
+                    <div class="help-text">新規・変更が必要な画面の数（入力・表示・照会など）</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="simple-complexity">システム複雑度</label>
+                    <select id="simple-complexity">
+                        <option value="0.7">低（単純な処理、少ないバリエーション）</option>
+                        <option value="1" selected>中（標準的な業務処理）</option>
+                        <option value="1.5">高（複雑な業務ロジック、多くの例外処理）</option>
+                        <option value="2.0">非常に高（複雑な計算、高度な依存関係）</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="simple-team">チーム経験値</label>
+                    <select id="simple-team">
+                        <option value="1.2">低（未経験者が多い、または技術が新しい）</option>
+                        <option value="1" selected>中（経験者と未経験者の混合）</option>
+                        <option value="0.8">高（経験者が多く、同様のシステム開発経験あり）</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="simple-risk">リスクバッファ</label>
+                    <select id="simple-risk">
+                        <option value="1.1">10% (要件が明確)</option>
+                        <option value="1.2" selected>20% (一部不明確な要件あり)</option>
+                        <option value="1.3">30% (多くの要件が不明確)</option>
+                        <option value="1.5">50% (ほとんどの要件が不明確)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateSimpleEstimate()">工数を計算</button>
+                
+                <div id="simple-result" style="margin-top: 2rem; display: none;">
+                    <h3>工数概算結果</h3>
+                    <p class="help-text">数値をクリックして編集できます。</p>
+                    <table class="result-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>工数 (人日)</th>
+                        </tr>
+                        <tr>
+                            <td>要件分析・設計</td>
+                            <td><span class="editable" contenteditable="true" id="simple-analysis">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>開発</td>
+                            <td><span class="editable" contenteditable="true" id="simple-development">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>テスト</td>
+                            <td><span class="editable" contenteditable="true" id="simple-testing">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>合計</td>
+                            <td><span class="editable" contenteditable="true" id="simple-total" style="font-weight: bold;">0</span></td>
+                        </tr>
+                    </table>
+                    <button class="btn-secondary" onclick="transferToEstimateSheet('simple')">見積書形式に転記</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3点見積法 -->
+        <div id="three-point" class="tab-content">
+            <div class="card">
+                <h2>3点見積法</h2>
+                <p>楽観的、最適、悲観的な3つのシナリオで見積りを行い、より現実的な期待値を算出します。</p>
+                
+                <div class="form-group">
+                    <label for="three-optimistic">楽観的見積 (人日)</label>
+                    <input type="number" id="three-optimistic" min="0" value="10">
+                    <div class="help-text">すべてが順調に進んだ場合の最小工数</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="three-likely">最も可能性の高い見積 (人日)</label>
+                    <input type="number" id="three-likely" min="0" value="15">
+                    <div class="help-text">最も発生する可能性が高い工数</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="three-pessimistic">悲観的見積 (人日)</label>
+                    <input type="number" id="three-pessimistic" min="0" value="30">
+                    <div class="help-text">リスクが発生した場合の最大工数</div>
+                </div>
+                
+                <button onclick="calculateThreePointEstimate()">工数を計算</button>
+                
+                <div id="three-point-result" style="margin-top: 2rem; display: none;">
+                    <h3>3点見積法による工数概算結果</h3>
+                    <p class="help-text">数値をクリックして編集できます。</p>
+                    <table class="result-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>工数 (人日)</th>
+                        </tr>
+                        <tr>
+                            <td>期待値（PERT計算）</td>
+                            <td><span class="editable" contenteditable="true" id="three-expected">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>標準偏差</td>
+                            <td><span class="editable" contenteditable="true" id="three-deviation">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>90%信頼区間</td>
+                            <td><span class="editable" contenteditable="true" id="three-confidence">0</span></td>
+                        </tr>
+                    </table>
+                    <button class="btn-secondary" onclick="transferToEstimateSheet('three')">見積書形式に転記</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 機能点数法 -->
+        <div id="feature-point" class="tab-content">
+            <div class="card">
+                <h2>機能点数法（簡易版）</h2>
+                <p>機能要素ごとに点数付けを行い、より詳細な見積りを算出します。</p>
+                
+                <div class="form-group">
+                    <label for="fp-screens">画面数</label>
+                    <div class="input-group">
+                        <input type="number" id="fp-screens" min="0" value="5">
+                        <span>× 2人日 = <span id="fp-screens-total">10</span>人日</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fp-reports">帳票数</label>
+                    <div class="input-group">
+                        <input type="number" id="fp-reports" min="0" value="2">
+                        <span>× 1.5人日 = <span id="fp-reports-total">3</span>人日</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fp-tables">DB設計・変更テーブル数</label>
+                    <div class="input-group">
+                        <input type="number" id="fp-tables" min="0" value="3">
+                        <span>× 1.5人日 = <span id="fp-tables-total">4.5</span>人日</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fp-interfaces">外部インターフェース数</label>
+                    <div class="input-group">
+                        <input type="number" id="fp-interfaces" min="0" value="1">
+                        <span>× 3人日 = <span id="fp-interfaces-total">3</span>人日</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fp-complexity">複雑度係数</label>
+                    <select id="fp-complexity">
+                        <option value="0.8">低（単純、既存技術中心）</option>
+                        <option value="1" selected>中（標準的な複雑さ）</option>
+                        <option value="1.3">高（複雑な処理、新技術）</option>
+                        <option value="1.6">非常に高（高度に複雑、新技術多用）</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fp-risk">リスクバッファ</label>
+                    <select id="fp-risk">
+                        <option value="1.1">10% (要件が明確)</option>
+                        <option value="1.2" selected>20% (一部不明確な要件あり)</option>
+                        <option value="1.3">30% (多くの要件が不明確)</option>
+                        <option value="1.5">50% (ほとんどの要件が不明確)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateFeaturePointEstimate()">工数を計算</button>
+                
+                <div id="feature-point-result" style="margin-top: 2rem; display: none;">
+                    <h3>機能点数法による工数概算結果</h3>
+                    <p class="help-text">数値をクリックして編集できます。</p>
+                    <table class="result-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>工数 (人日)</th>
+                            <th>割合</th>
+                        </tr>
+                        <tr>
+                            <td>要件分析・設計</td>
+                            <td><span class="editable" contenteditable="true" id="fp-analysis">0</span></td>
+                            <td>30%</td>
+                        </tr>
+                        <tr>
+                            <td>開発</td>
+                            <td><span class="editable" contenteditable="true" id="fp-development">0</span></td>
+                            <td>40%</td>
+                        </tr>
+                        <tr>
+                            <td>テスト</td>
+                            <td><span class="editable" contenteditable="true" id="fp-testing">0</span></td>
+                            <td>20%</td>
+                        </tr>
+                        <tr>
+                            <td>導入・運用準備</td>
+                            <td><span class="editable" contenteditable="true" id="fp-deployment">0</span></td>
+                            <td>10%</td>
+                        </tr>
+                        <tr>
+                            <td>合計</td>
+                            <td><span class="editable" contenteditable="true" id="fp-total" style="font-weight: bold;">0</span></td>
+                            <td>100%</td>
+                        </tr>
+                    </table>
+                    <button class="btn-secondary" onclick="transferToEstimateSheet('fp')">見積書形式に転記</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 類似案件比較法 -->
+        <div id="comparison" class="tab-content">
+            <div class="card">
+                <h2>類似案件比較法</h2>
+                <p>過去の類似案件の実績をもとに、規模や複雑さの違いを考慮して工数を算出します。</p>
+                
+                <div class="form-group">
+                    <label for="comp-previous">過去案件の実績工数 (人日)</label>
+                    <input type="number" id="comp-previous" min="0" value="30">
+                    <div class="help-text">最も類似した過去案件の総工数</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comp-size">規模比較係数</label>
+                    <select id="comp-size">
+                        <option value="0.6">大幅に小さい (60%)</option>
+                        <option value="0.8">やや小さい (80%)</option>
+                        <option value="1" selected>同程度 (100%)</option>
+                        <option value="1.3">やや大きい (130%)</option>
+                        <option value="1.6">大幅に大きい (160%)</option>
+                        <option value="2">2倍以上の規模 (200%)</option>
+                    </select>
+                    <div class="help-text">過去案件と比較した際の画面数・機能数等の規模差</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comp-complexity">複雑さ比較係数</label>
+                    <select id="comp-complexity">
+                        <option value="0.7">大幅に単純 (70%)</option>
+                        <option value="0.9">やや単純 (90%)</option>
+                        <option value="1" selected>同程度 (100%)</option>
+                        <option value="1.2">やや複雑 (120%)</option>
+                        <option value="1.5">大幅に複雑 (150%)</option>
+                    </select>
+                    <div class="help-text">過去案件と比較した際の処理の複雑さ・技術的難易度の差</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comp-requirements">要件明確度係数</label>
+                    <select id="comp-requirements">
+                        <option value="0.9">過去より明確 (90%)</option>
+                        <option value="1" selected>同程度 (100%)</option>
+                        <option value="1.2">やや不明確 (120%)</option>
+                        <option value="1.4">大幅に不明確 (140%)</option>
+                    </select>
+                    <div class="help-text">過去案件と比較した際の要件の明確さの差</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comp-experience">チーム経験係数</label>
+                    <select id="comp-experience">
+                        <option value="0.8">過去より経験豊富 (80%)</option>
+                        <option value="1" selected>同程度 (100%)</option>
+                        <option value="1.2">やや経験不足 (120%)</option>
+                        <option value="1.4">大幅に経験不足 (140%)</option>
+                    </select>
+                    <div class="help-text">過去案件と比較した際のチーム経験・スキルの差</div>
+                </div>
+                
+                <button onclick="calculateComparisonEstimate()">工数を計算</button>
+                
+                <div id="comparison-result" style="margin-top: 2rem; display: none;">
+                    <h3>類似案件比較法による工数概算結果</h3>
+                    <p class="help-text">数値をクリックして編集できます。</p>
+                    <table class="result-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>係数</th>
+                            <th>影響</th>
+                        </tr>
+                        <tr>
+                            <td>過去案件実績</td>
+                            <td><span class="editable" contenteditable="true" id="comp-baseline">0</span></td>
+                            <td>基準値</td>
+                        </tr>
+                        <tr>
+                            <td>規模比較</td>
+                            <td><span class="editable" contenteditable="true" id="comp-size-factor">0</span></td>
+                            <td><span class="editable" contenteditable="true" id="comp-size-impact">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>複雑さ比較</td>
+                            <td><span class="editable" contenteditable="true" id="comp-complexity-factor">0</span></td>
+                            <td><span class="editable" contenteditable="true" id="comp-complexity-impact">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>要件明確度</td>
+                            <td><span class="editable" contenteditable="true" id="comp-requirements-factor">0</span></td>
+                            <td><span class="editable" contenteditable="true" id="comp-requirements-impact">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>チーム経験</td>
+                            <td><span class="editable" contenteditable="true" id="comp-experience-factor">0</span></td>
+                            <td><span class="editable" contenteditable="true" id="comp-experience-impact">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>合計見積工数</td>
+                            <td colspan="2"><span class="editable" contenteditable="true" id="comp-total" style="font-weight: bold;">0</span></td>
+                        </tr>
+                    </table>
+                    <button class="btn-secondary" onclick="transferToEstimateSheet('comp')">見積書形式に転記</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ステップ数見積法 -->
+        <div id="step-based" class="tab-content">
+            <div class="card">
+                <h2>ステップ数見積法</h2>
+                <p>プログラムのステップ数（行数）に基づいて工数を算出する手法です。</p>
+                
+                <div class="form-group">
+                    <label for="step-new">新規開発ステップ数</label>
+                    <input type="number" id="step-new" min="0" value="1000">
+                    <div class="help-text">新たに開発するプログラムコードの行数（ステップ数）</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-modify">修正ステップ数</label>
+                    <input type="number" id="step-modify" min="0" value="500">
+                    <div class="help-text">既存コードの修正行数（ステップ数）</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-new-productivity">新規開発生産性（ステップ/人日）</label>
+                    <select id="step-new-productivity">
+                        <option value="40">低（40ステップ/人日）</option>
+                        <option value="50" selected>中（50ステップ/人日）</option>
+                        <option value="70">高（70ステップ/人日）</option>
+                        <option value="100">非常に高（100ステップ/人日）</option>
+                    </select>
+                    <div class="help-text">1人が1日あたりに作成できるステップ数</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-modify-productivity">修正作業生産性（ステップ/人日）</label>
+                    <select id="step-modify-productivity">
+                        <option value="30">低（30ステップ/人日）</option>
+                        <option value="40" selected>中（40ステップ/人日）</option>
+                        <option value="60">高（60ステップ/人日）</option>
+                        <option value="80">非常に高（80ステップ/人日）</option>
+                    </select>
+                    <div class="help-text">1人が1日あたりに修正できるステップ数</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-complexity">複雑度係数</label>
+                    <select id="step-complexity">
+                        <option value="0.8">低（単純な処理が中心）</option>
+                        <option value="1" selected>中（標準的な複雑さ）</option>
+                        <option value="1.3">高（複雑な業務ロジック）</option>
+                        <option value="1.6">非常に高（高度なアルゴリズムや同期処理）</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-design-ratio">設計工数比率</label>
+                    <select id="step-design-ratio">
+                        <option value="0.3">30%（小規模・単純なシステム）</option>
+                        <option value="0.4" selected>40%（中規模・標準的なシステム）</option>
+                        <option value="0.5">50%（大規模・複雑なシステム）</option>
+                        <option value="0.6">60%（非常に複雑なシステム）</option>
+                    </select>
+                    <div class="help-text">コーディング工数に対する設計工数の比率</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-test-ratio">テスト工数比率</label>
+                    <select id="step-test-ratio">
+                        <option value="0.3">30%（小規模・単純なシステム）</option>
+                        <option value="0.4" selected>40%（中規模・標準的なシステム）</option>
+                        <option value="0.6">60%（大規模・複雑なシステム）</option>
+                        <option value="0.8">80%（高い品質要件、複雑なシステム）</option>
+                    </select>
+                    <div class="help-text">コーディング工数に対するテスト工数の比率</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="step-risk">リスクバッファ</label>
+                    <select id="step-risk">
+                        <option value="1.1">10% (要件が明確)</option>
+                        <option value="1.2" selected>20% (一部不明確な要件あり)</option>
+                        <option value="1.3">30% (多くの要件が不明確)</option>
+                        <option value="1.5">50% (ほとんどの要件が不明確)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateStepBasedEstimate()">工数を計算</button>
+                
+                <div id="step-result" style="margin-top: 2rem; display: none;">
+                    <h3>ステップ数見積法による工数概算結果</h3>
+                    <p class="help-text">数値をクリックして編集できます。</p>
+                    <table class="result-table">
+                        <tr>
+                            <th>項目</th>
+                            <th>工数 (人日)</th>
+                            <th>備考</th>
+                        </tr>
+                        <tr>
+                            <td>新規開発コーディング</td>
+                            <td><span class="editable" contenteditable="true" id="step-new-effort">0</span></td>
+                            <td id="step-new-note"></td>
+                        </tr>
+                        <tr>
+                            <td>修正コーディング</td>
+                            <td><span class="editable" contenteditable="true" id="step-modify-effort">0</span></td>
+                            <td id="step-modify-note"></td>
+                        </tr>
+                        <tr>
+                            <td>設計工数</td>
+                            <td><span class="editable" contenteditable="true" id="step-design-effort">0</span></td>
+                            <td id="step-design-note"></td>
+                        </tr>
+                        <tr>
+                            <td>テスト工数</td>
+                            <td><span class="editable" contenteditable="true" id="step-test-effort">0</span></td>
+                            <td id="step-test-note"></td>
+                        </tr>
+                        <tr>
+                            <td>小計（バッファ前）</td>
+                            <td><span class="editable" contenteditable="true" id="step-subtotal">0</span></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>リスクバッファ</td>
+                            <td><span class="editable" contenteditable="true" id="step-buffer">0</span></td>
+                            <td id="step-buffer-note"></td>
+                        </tr>
+                        <tr>
+                            <td>合計</td>
+                            <td><span class="editable" contenteditable="true" id="step-total" style="font-weight: bold;">0</span></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <button class="btn-secondary" onclick="transferToEstimateSheet('step')">見積書形式に転記</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 見積書形式 -->
+        <div id="estimate-sheet" class="tab-content">
+            <div class="card">
+                <h2>見積書情報入力</h2>
+                
+                <div class="form-group">
+                    <label for="estimate-project">プロジェクト名</label>
+                    <input type="text" id="estimate-project" value="〇〇システム改修">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estimate-date">見積日</label>
+                    <input type="date" id="estimate-date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estimate-requester">依頼元</label>
+                    <input type="text" id="estimate-requester" value="〇〇部 △△課">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estimate-estimator">見積者</label>
+                    <input type="text" id="estimate-estimator" value="情報システム部 開発課">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estimate-note">備考</label>
+                    <textarea id="estimate-note" rows="3">・本見積りは現時点の情報に基づく概算です。
+・詳細要件確定後に再見積りを行います。
+・実際の工数は要件や環境により変動する可能性があります。</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>見積項目</label>
+                    <p class="help-text">各タブで計算した結果を「見積書形式に転記」ボタンで反映できます。<br>または以下から直接追加することもできます。</p>
+                    
+                    <div id="estimate-items-container">
+                        <!-- 見積項目が動的に追加される場所 -->
+                    </div>
+                    
+                    <button onclick="addEstimateItem()" class="btn-secondary">項目を追加</button>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <button onclick="generateEstimateSheet()" class="btn-orange">見積書を生成</button>
+                </div>
+            </div>
+            
+            <!-- 見積書表示エリア -->
+            <div id="estimate-sheet-display" class="card" style="display: none;">
+                <div class="estimate-actions no-print">
+                    <button onclick="printEstimateSheet()" class="btn-secondary">印刷</button>
+                    <button onclick="editEstimateSheet()" class="btn-secondary">編集に戻る</button>
+                </div>
+                
+                <div id="print-area" class="print-area">
+                    <!-- 見積書が動的に生成される場所 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>工数見積りのポイント</h2>
+            <ul>
+                <li>改修範囲が明確でない場合は、最大・最小・最適の3パターンで見積もりましょう</li>
+                <li>不確実性が高い場合は十分なリスクバッファ（20～50%）を含めましょう</li>
+                <li>過去の類似案件の実績データを活用することで精度が向上します</li>
+                <li>改修範囲を明確にする調査フェーズを設けることも効果的です</li>
+                <li>複数の見積手法を組み合わせ、結果を比較検討しましょう</li>
+                <li>ステップ数見積法は特に既存システムの改修案件に有効です</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // ページ読み込み時の初期化
+        window.onload = function() {
+            setupEventListeners();
+            setDefaultDate();
+        };
+        
+        // 現在日付をデフォルトで設定
+        function setDefaultDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('estimate-date').value = `${year}-${month}-${day}`;
+        }
+        
+        // タブ切り替え
+        function switchTab(tabId) {
+            // タブコンテンツをすべて非表示にする
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // タブをすべて非アクティブにする
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 選択されたタブとコンテンツをアクティブにする
+            document.getElementById(tabId).classList.add('active');
+            const selectedTab = document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`);
+            selectedTab.classList.add('active');
+        }
+        
+        // 簡易見積法の計算
+        function calculateSimpleEstimate() {
+            const screens = parseFloat(document.getElementById('simple-screens').value) || 0;
+            const complexity = parseFloat(document.getElementById('simple-complexity').value) || 1;
+            const team = parseFloat(document.getElementById('simple-team').value) || 1;
+            const risk = parseFloat(document.getElementById('simple-risk').value) || 1.2;
+            
+            // 基本工数: 1画面あたり3人日として計算
+            const baseEffort = screens * 3;
+            
+            // 複雑度、チーム経験値、リスクを考慮した調整
+            const adjustedEffort = baseEffort * complexity * team * risk;
+            
+            // フェーズ別の工数配分
+            const analysisEffort = adjustedEffort * 0.3; // 30% を要件分析・設計に
+            const developmentEffort = adjustedEffort * 0.4; // 40% を開発に
+            const testingEffort = adjustedEffort * 0.3; // 30% をテストに
+            
+            // 結果を表示
+            document.getElementById('simple-analysis').textContent = analysisEffort.toFixed(1);
+            document.getElementById('simple-development').textContent = developmentEffort.toFixed(1);
+            document.getElementById('simple-testing').textContent = testingEffort.toFixed(1);
+            document.getElementById('simple-total').textContent = adjustedEffort.toFixed(1);
+            
+            document.getElementById('simple-result').style.display = 'block';
+        }
+        
+        // 3点見積法の計算
+        function calculateThreePointEstimate() {
+            const optimistic = parseFloat(document.getElementById('three-optimistic').value) || 0;
+            const likely = parseFloat(document.getElementById('three-likely').value) || 0;
+            const pessimistic = parseFloat(document.getElementById('three-pessimistic').value) || 0;
+            
+            // PERT期待値: (最小 + 4×最適 + 最大) ÷ 6
+            const expected = (optimistic + 4 * likely + pessimistic) / 6;
+            
+            // 標準偏差: (最大 - 最小) ÷ 6
+            const standardDeviation = (pessimistic - optimistic) / 6;
+            
+            // 90%信頼区間
+            const lowerBound = expected - 1.645 * standardDeviation;
+            const upperBound = expected + 1.645 * standardDeviation;
+            
+            // 結果を表示
+            document.getElementById('three-expected').textContent = expected.toFixed(1);
+            document.getElementById('three-deviation').textContent = standardDeviation.toFixed(2);
+            document.getElementById('three-confidence').textContent = 
+                `${Math.max(0, lowerBound).toFixed(1)} ～ ${upperBound.toFixed(1)}`;
+            
+            document.getElementById('three-point-result').style.display = 'block';
+        }
+        
+        // 機能点数法の計算
+        function calculateFeaturePointEstimate() {
+            // 各要素の数と基本工数
+            const screens = parseFloat(document.getElementById('fp-screens').value) || 0;
+            const reports = parseFloat(document.getElementById('fp-reports').value) || 0;
+            const tables = parseFloat(document.getElementById('fp-tables').value) || 0;
+            const interfaces = parseFloat(document.getElementById('fp-interfaces').value) || 0;
+            
+            // 複雑度係数とリスクバッファ
+            const complexity = parseFloat(document.getElementById('fp-complexity').value) || 1;
+            const risk = parseFloat(document.getElementById('fp-risk').value) || 1.2;
+            
+            // 各要素の工数を計算して表示
+            document.getElementById('fp-screens-total').textContent = (screens * 2).toFixed(1);
+            document.getElementById('fp-reports-total').textContent = (reports * 1.5).toFixed(1);
+            document.getElementById('fp-tables-total').textContent = (tables * 1.5).toFixed(1);
+            document.getElementById('fp-interfaces-total').textContent = (interfaces * 3).toFixed(1);
+            
+            // 基本工数の合計
+            const baseEffort = (screens * 2) + (reports * 1.5) + (tables * 1.5) + (interfaces * 3);
+            
+            // 複雑度とリスクを考慮した調整
+            const adjustedEffort = baseEffort * complexity * risk;
+            
+            // フェーズ別の工数配分
+            const analysisEffort = adjustedEffort * 0.3; // 30% を要件分析・設計に
+            const developmentEffort = adjustedEffort * 0.4; // 40% を開発に
+            const testingEffort = adjustedEffort * 0.2; // 20% をテストに
+            const deploymentEffort = adjustedEffort * 0.1; // 10% を導入・運用準備に
+            
+            // 結果を表示
+            document.getElementById('fp-analysis').textContent = analysisEffort.toFixed(1);
+            document.getElementById('fp-development').textContent = developmentEffort.toFixed(1);
+            document.getElementById('fp-testing').textContent = testingEffort.toFixed(1);
+            document.getElementById('fp-deployment').textContent = deploymentEffort.toFixed(1);
+            document.getElementById('fp-total').textContent = adjustedEffort.toFixed(1);
+            
+            document.getElementById('feature-point-result').style.display = 'block';
+        }
+        
+        // 類似案件比較法の計算
+        function calculateComparisonEstimate() {
+            const previousEffort = parseFloat(document.getElementById('comp-previous').value) || 0;
+            const sizeFactorValue = parseFloat(document.getElementById('comp-size').value) || 1;
+            const complexityFactorValue = parseFloat(document.getElementById('comp-complexity').value) || 1;
+            const requirementsFactorValue = parseFloat(document.getElementById('comp-requirements').value) || 1;
+            const experienceFactorValue = parseFloat(document.getElementById('comp-experience').value) || 1;
+            
+            // 各係数による影響の計算
+            const sizeImpact = previousEffort * sizeFactorValue - previousEffort;
+            const complexityImpact = previousEffort * complexityFactorValue * sizeFactorValue - previousEffort * sizeFactorValue;
+            const requirementsImpact = previousEffort * sizeFactorValue * complexityFactorValue * requirementsFactorValue - previousEffort * sizeFactorValue * complexityFactorValue;
+            const experienceImpact = previousEffort * sizeFactorValue * complexityFactorValue * requirementsFactorValue * experienceFactorValue - previousEffort * sizeFactorValue * complexityFactorValue * requirementsFactorValue;
+            
+            // 総工数の計算
+            const totalEffort = previousEffort * sizeFactorValue * complexityFactorValue * requirementsFactorValue * experienceFactorValue;
+            
+            // 結果を表示
+            document.getElementById('comp-baseline').textContent = previousEffort.toFixed(1);
+            document.getElementById('comp-size-factor').textContent = sizeFactorValue.toFixed(2);
+            document.getElementById('comp-complexity-factor').textContent = complexityFactorValue.toFixed(2);
+            document.getElementById('comp-requirements-factor').textContent = requirementsFactorValue.toFixed(2);
+            document.getElementById('comp-experience-factor').textContent = experienceFactorValue.toFixed(2);
+            
+            document.getElementById('comp-size-impact').textContent = sizeImpact >= 0 ? `+${sizeImpact.toFixed(1)}` : sizeImpact.toFixed(1);
+            document.getElementById('comp-complexity-impact').textContent = complexityImpact >= 0 ? `+${complexityImpact.toFixed(1)}` : complexityImpact.toFixed(1);
+            document.getElementById('comp-requirements-impact').textContent = requirementsImpact >= 0 ? `+${requirementsImpact.toFixed(1)}` : requirementsImpact.toFixed(1);
+            document.getElementById('comp-experience-impact').textContent = experienceImpact >= 0 ? `+${experienceImpact.toFixed(1)}` : experienceImpact.toFixed(1);
+            
+            document.getElementById('comp-total').textContent = totalEffort.toFixed(1) + ' 人日';
+            
+            document.getElementById('comparison-result').style.display = 'block';
+        }
+        
+        // ステップ数見積法の計算
+        function calculateStepBasedEstimate() {
+            const newSteps = parseFloat(document.getElementById('step-new').value) || 0;
+            const modifySteps = parseFloat(document.getElementById('step-modify').value) || 0;
+            const newProductivity = parseFloat(document.getElementById('step-new-productivity').value) || 50;
+            const modifyProductivity = parseFloat(document.getElementById('step-modify-productivity').value) || 40;
+            const complexity = parseFloat(document.getElementById('step-complexity').value) || 1;
+            const designRatio = parseFloat(document.getElementById('step-design-ratio').value) || 0.4;
+            const testRatio = parseFloat(document.getElementById('step-test-ratio').value) || 0.4;
+            const risk = parseFloat(document.getElementById('step-risk').value) || 1.2;
+            
+            // コーディング工数の計算
+            const newCodingEffort = (newSteps / newProductivity) * complexity;
+            const modifyCodingEffort = (modifySteps / modifyProductivity) * complexity;
+            
+            // 設計工数とテスト工数の計算
+            const totalCodingEffort = newCodingEffort + modifyCodingEffort;
+            const designEffort = totalCodingEffort * designRatio;
+            const testEffort = totalCodingEffort * testRatio;
+            
+            // 小計と合計の計算
+            const subtotal = totalCodingEffort + designEffort + testEffort;
+            const buffer = subtotal * (risk - 1);
+            const total = subtotal * risk;
+            
+            // 結果を表示
+            document.getElementById('step-new-effort').textContent = newCodingEffort.toFixed(1);
+            document.getElementById('step-new-note').textContent = `${newSteps}ステップ ÷ ${newProductivity}ステップ/人日 × 複雑度${complexity}`;
+            
+            document.getElementById('step-modify-effort').textContent = modifyCodingEffort.toFixed(1);
+            document.getElementById('step-modify-note').textContent = `${modifySteps}ステップ ÷ ${modifyProductivity}ステップ/人日 × 複雑度${complexity}`;
+            
+            document.getElementById('step-design-effort').textContent = designEffort.toFixed(1);
+            document.getElementById('step-design-note').textContent = `コーディング工数 ${totalCodingEffort.toFixed(1)} × 設計比率 ${designRatio}`;
+            
+            document.getElementById('step-test-effort').textContent = testEffort.toFixed(1);
+            document.getElementById('step-test-note').textContent = `コーディング工数 ${totalCodingEffort.toFixed(1)} × テスト比率 ${testRatio}`;
+            
+            document.getElementById('step-subtotal').textContent = subtotal.toFixed(1);
+            
+            document.getElementById('step-buffer').textContent = buffer.toFixed(1);
+            document.getElementById('step-buffer-note').textContent = `小計 ${subtotal.toFixed(1)} × リスクバッファ ${(risk - 1) * 100}%`;
+            
+            document.getElementById('step-total').textContent = total.toFixed(1);
+            
+            document.getElementById('step-result').style.display = 'block';
+        }
+        
+        // 入力値が変更されたときに動的に計算するイベントリスナーを設定
+        function setupEventListeners() {
+            // 機能点数法の入力フィールドの変更イベントリスナー
+            document.getElementById('fp-screens').addEventListener('input', function() {
+                const screens = parseFloat(this.value) || 0;
+                document.getElementById('fp-screens-total').textContent = (screens * 2).toFixed(1);
+            });
+            
+            document.getElementById('fp-reports').addEventListener('input', function() {
+                const reports = parseFloat(this.value) || 0;
+                document.getElementById('fp-reports-total').textContent = (reports * 1.5).toFixed(1);
+            });
+            
+            document.getElementById('fp-tables').addEventListener('input', function() {
+                const tables = parseFloat(this.value) || 0;
+                document.getElementById('fp-tables-total').textContent = (tables * 1.5).toFixed(1);
+            });
+            
+            document.getElementById('fp-interfaces').addEventListener('input', function() {
+                const interfaces = parseFloat(this.value) || 0;
+                document.getElementById('fp-interfaces-total').textContent = (interfaces * 3).toFixed(1);
+            });
+        }
+        
+        // 計算結果を見積書形式に転記する関数
+        function transferToEstimateSheet(method) {
+            // 見積書項目のコンテナを取得
+            const container = document.getElementById('estimate-items-container');
+            
+            // 方法に応じて項目を追加
+            if (method === 'simple') {
+                // 簡易見積法の結果を転記
+                const analysisEffort = document.getElementById('simple-analysis').textContent;
+                const developmentEffort = document.getElementById('simple-development').textContent;
+                const testingEffort = document.getElementById('simple-testing').textContent;
+                const totalEffort = document.getElementById('simple-total').textContent;
+                
+                addEstimateItemWithValues('要件分析・設計（簡易見積法）', analysisEffort);
+                addEstimateItemWithValues('開発（簡易見積法）', developmentEffort);
+                addEstimateItemWithValues('テスト（簡易見積法）', testingEffort);
+            } 
+            else if (method === 'three') {
+                // 3点見積法の結果を転記
+                const expectedEffort = document.getElementById('three-expected').textContent;
+                
+                addEstimateItemWithValues('開発工数（3点見積法）', expectedEffort);
+            } 
+            else if (method === 'fp') {
+                // 機能点数法の結果を転記
+                const analysisEffort = document.getElementById('fp-analysis').textContent;
+                const developmentEffort = document.getElementById('fp-development').textContent;
+                const testingEffort = document.getElementById('fp-testing').textContent;
+                const deploymentEffort = document.getElementById('fp-deployment').textContent;
+                
+                addEstimateItemWithValues('要件分析・設計（機能点数法）', analysisEffort);
+                addEstimateItemWithValues('開発（機能点数法）', developmentEffort);
+                addEstimateItemWithValues('テスト（機能点数法）', testingEffort);
+                addEstimateItemWithValues('導入・運用準備（機能点数法）', deploymentEffort);
+            } 
+            else if (method === 'comp') {
+                // 類似案件比較法の結果を転記
+                let totalEffort = document.getElementById('comp-total').textContent;
+                totalEffort = totalEffort.replace(' 人日', ''); // 単位を削除
+                
+                addEstimateItemWithValues('開発工数（類似案件比較法）', totalEffort);
+            }
+            else if (method === 'step') {
+                // ステップ数見積法の結果を転記
+                const newCodingEffort = document.getElementById('step-new-effort').textContent;
+                const modifyCodingEffort = document.getElementById('step-modify-effort').textContent;
+                const designEffort = document.getElementById('step-design-effort').textContent;
+                const testEffort = document.getElementById('step-test-effort').textContent;
+                
+                addEstimateItemWithValues('新規開発コーディング（ステップ数見積法）', newCodingEffort);
+                addEstimateItemWithValues('修正コーディング（ステップ数見積法）', modifyCodingEffort);
+                addEstimateItemWithValues('設計（ステップ数見積法）', designEffort);
+                addEstimateItemWithValues('テスト（ステップ数見積法）', testEffort);
+            }
+            
+            // 見積書タブに切り替え
+            switchTab('estimate-sheet');
+        }
+        
+        // 見積書項目を指定値で追加する関数
+        function addEstimateItemWithValues(name, effort) {
+            const container = document.getElementById('estimate-items-container');
+            const itemId = 'item-' + Date.now();
+            
+            const itemHTML = `
+                <div id="${itemId}" class="form-group" style="border: 1px solid #eee; padding: 1rem; margin-bottom: 1rem;">
+                    <div class="input-group" style="margin-bottom: 0.5rem;">
+                        <input type="text" placeholder="項目名" value="${name}" style="flex: 3;">
+                        <input type="number" placeholder="工数" value="${effort}" step="0.1" min="0" style="flex: 1;">
+                        <span>人日</span>
+                        <button onclick="removeEstimateItem('${itemId}')" class="btn-grey" style="margin-left: 0.5rem;">削除</button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', itemHTML);
+        }
+        
+        // 見積書に項目を追加する関数
+        function addEstimateItem() {
+            const container = document.getElementById('estimate-items-container');
+            const itemId = 'item-' + Date.now();
+            
+            const itemHTML = `
+                <div id="${itemId}" class="form-group" style="border: 1px solid #eee; padding: 1rem; margin-bottom: 1rem;">
+                    <div class="input-group" style="margin-bottom: 0.5rem;">
+                        <input type="text" placeholder="項目名" style="flex: 3;">
+                        <input type="number" placeholder="工数" step="0.1" min="0" style="flex: 1;">
+                        <span>人日</span>
+                        <button onclick="removeEstimateItem('${itemId}')" class="btn-grey" style="margin-left: 0.5rem;">削除</button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', itemHTML);
+        }
+        
+        // 見積書から項目を削除する関数
+        function removeEstimateItem(itemId) {
+            const item = document.getElementById(itemId);
+            if (item) {
+                item.remove();
+            }
+        }
+        
+        // 見積書を生成する関数
+        function generateEstimateSheet() {
+            // 必要な情報を取得
+            const projectName = document.getElementById('estimate-project').value;
+            const estimateDate = document.getElementById('estimate-date').value;
+            const requester = document.getElementById('estimate-requester').value;
+            const estimator = document.getElementById('estimate-estimator').value;
+            const note = document.getElementById('estimate-note').value;
+            
+            // 見積項目を収集
+            const items = [];
+            const itemContainers = document.getElementById('estimate-items-container').children;
+            let totalEffort = 0;
+            
+            for (let i = 0; i < itemContainers.length; i++) {
+                const inputs = itemContainers[i].querySelectorAll('input');
+                const itemName = inputs[0].value;
+                const itemEffort = parseFloat(inputs[1].value) || 0;
+                
+                items.push({
+                    name: itemName,
+                    effort: itemEffort
+                });
+                
+                totalEffort += itemEffort;
+            }
+            
+            // 日付のフォーマット
+            let formattedDate = '';
+            if (estimateDate) {
+                const dateParts = estimateDate.split('-');
+                formattedDate = `${dateParts[0]}年${dateParts[1]}月${dateParts[2]}日`;
+            }
+            
+            // 見積書HTMLを生成
+            const estimateHTML = `
+                <div class="estimate-form">
+                    <div class="estimate-header">
+                        <h2>開発工数見積書</h2>
+                    </div>
+                    
+                    <div class="estimate-info">
+                        <div class="estimate-info-item">
+                            <p><strong>プロジェクト名：</strong>${projectName}</p>
+                            <p><strong>依頼元：</strong>${requester}</p>
+                        </div>
+                        <div class="estimate-info-item" style="text-align: right;">
+                            <p><strong>見積日：</strong>${formattedDate}</p>
+                            <p><strong>見積者：</strong>${estimator}</p>
+                        </div>
+                    </div>
+                    
+                    <table class="estimate-table">
+                        <tr>
+                            <th style="width: 60%;">作業項目</th>
+                            <th style="width: 25%;">工数（人日）</th>
+                            <th style="width: 15%;">備考</th>
+                        </tr>
+                        ${items.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td style="text-align: right;">${item.effort.toFixed(1)}</td>
+                                <td></td>
+                            </tr>
+                        `).join('')}
+                        <tr>
+                            <td style="text-align: right; font-weight: bold;">合計</td>
+                            <td style="text-align: right; font-weight: bold;">${totalEffort.toFixed(1)}</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="estimate-footer">
+                        <h3>備考</h3>
+                        <p>${note.replace(/\n/g, '<br>')}</p>
+                    </div>
+                </div>
+            `;
+            
+            // 見積書を表示エリアに挿入
+            document.getElementById('print-area').innerHTML = estimateHTML;
+            document.getElementById('estimate-sheet-display').style.display = 'block';
+        }
+        
+        // 見積書を印刷する関数
+        function printEstimateSheet() {
+            window.print();
+        }
+        
+        // 見積書編集に戻る関数
+        function editEstimateSheet() {
+            document.getElementById('estimate-sheet-display').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
